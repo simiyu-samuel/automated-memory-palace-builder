@@ -1,0 +1,380 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Memory Palace Design System */
+:root {
+  --palace-gold: #F59E0B;
+  --memory-purple: #8B5CF6;
+  --palace-blue: #3B82F6;
+  --glass-bg: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-glow: rgba(0, 0, 0, 0.3);
+}
+
+/* Global Styles */
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Memory Palace Background */
+.palace-bg {
+  background: linear-gradient(135deg, 
+    #F8FAFC 0%, 
+    #F1F5F9 25%, 
+    #E2E8F0 50%, 
+    #CBD5E1 75%, 
+    #94A3B8 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.palace-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(245, 158, 11, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Authentication Background */
+.auth-bg {
+  background: linear-gradient(135deg,
+    #1e1b4b 0%,
+    #312e81 25%,
+    #4c1d95 50%,
+    #7c2d92 75%,
+    #db2777 100%
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 25% 75%, rgba(245, 158, 11, 0.4) 0%, transparent 60%),
+    radial-gradient(circle at 75% 25%, rgba(139, 92, 246, 0.4) 0%, transparent 60%),
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Floating animation for background elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+}
+
+/* Glass morphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 48px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Memory card from Palace component */
+.memory-card {
+  @apply glass-card p-4 mb-3;
+  transition: all 0.3s ease;
+}
+
+.memory-card:hover {
+  transform: translateY(-1px) scale(1.01);
+}
+
+/* Palace sidebar */
+.palace-sidebar {
+  width: 320px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Palace navigation */
+.palace-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1rem 2rem;
+  position: relative;
+  z-index: 10;
+}
+
+.palace-container {
+  @apply palace-bg min-h-screen flex flex-col;
+}
+
+/* Custom Input Styling */
+.palace-input {
+  @apply w-full px-4 py-3 rounded-lg text-white placeholder-white/50;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.palace-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--palace-gold);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.palace-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Custom Button Styling */
+.palace-btn-primary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  background: linear-gradient(135deg, var(--palace-gold) 0%, #F97316 100%);
+  color: #000;
+  border: 0;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+}
+
+.palace-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+}
+
+.palace-btn-primary:active {
+  transform: translateY(0);
+}
+
+.palace-btn-secondary {
+  @apply px-6 py-3 rounded-lg font-medium transition-all duration-300;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.palace-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Custom colors for Tailwind */
+.text-palace-gold {
+  color: var(--palace-gold);
+}
+
+.text-memory-purple {
+  color: var(--memory-purple);
+}
+
+.bg-palace-gold {
+  background-color: var(--palace-gold);
+}
+
+.bg-memory-purple {
+  background-color: var(--memory-purple);
+}
+
+.border-palace-gold {
+  border-color: var(--palace-gold);
+}
+
+.ring-palace-gold {
+  --tw-ring-color: var(--palace-gold);
+}
+
+/* Label styling */
+.palace-label {
+  @apply block text-sm font-medium text-white/90 mb-2;
+}
+
+/* Error text styling */
+.palace-error {
+  @apply text-red-400 text-sm mt-1;
+}
+
+/* Link styling */
+.palace-link {
+  @apply text-palace-gold hover:text-yellow-400 transition-colors underline;
+}
+
+/* Success message styling */
+.palace-success {
+  @apply text-green-400 text-sm;
+}
+
+/* Checkbox styling */
+.palace-checkbox {
+  @apply rounded border-white/30 bg-white/20 text-palace-gold;
+}
+
+.palace-checkbox:focus {
+  --tw-ring-color: #F59E0B;
+  --tw-ring-offset-width: 0px;
+}
+
+/* Welcome page hero */
+.hero-text {
+  background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #e0f2fe 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Floating elements animation */
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+.floating:nth-child(2) {
+  animation-delay: -2s;
+}
+
+.floating:nth-child(3) {
+  animation-delay: -4s;
+}
+
+/* Responsive Design Improvements */
+@media (max-width: 768px) {
+  .palace-nav {
+    padding: 0.75rem 1rem;
+  }
+  
+  .glass-card {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  
+  .hero-text {
+    font-size: 2.5rem;
+  }
+  
+  .palace-sidebar {
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 50;
+  }
+}
+
+@media (max-width: 640px) {
+  .palace-input {
+    padding: 0.75rem 1rem;
+  }
+  
+  .palace-btn-primary,
+  .palace-btn-secondary {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+/* Dark mode support */
+.dark .glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .palace-input {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Light mode support */
+.light {
+  --palace-gold: #D97706;
+  --memory-purple: #7C3AED;
+  --palace-blue: #2563EB;
+}
+
+.light .palace-bg {
+  background: linear-gradient(135deg, 
+    #F3F4F6 0%, 
+    #E5E7EB 25%, 
+    #D1D5DB 50%, 
+    #9CA3AF 75%, 
+    #6B7280 100%
+  );
+}
+
+.light .auth-bg {
+  background: linear-gradient(135deg,
+    #EDE9FE 0%,
+    #DDD6FE 25%,
+    #C4B5FD 50%,
+    #A78BFA 75%,
+    #8B5CF6 100%
+  );
+}
+
+.light .glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1F2937;
+}
+
+.light .palace-nav {
+  background: rgba(255, 255, 255, 0.9);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1F2937;
+}
+
+.light .text-white {
+  color: #1F2937 !important;
+}
+
+.light .text-white\/80 {
+  color: rgba(31, 41, 55, 0.8) !important;
+}
+
+.light .text-white\/70 {
+  color: rgba(31, 41, 55, 0.7) !important;
+}
+
+.light .palace-input {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #1F2937;
+}
+
+.light .palace-input::placeholder {
+  color: rgba(31, 41, 55, 0.5);
+}
