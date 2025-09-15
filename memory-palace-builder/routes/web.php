@@ -89,13 +89,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = auth()->user();
         
         // Create or update API connection
+        // Validate Google OAuth is configured
+        if (!config('services.google.client_id') || config('services.google.client_id') === 'your_google_client_id_here') {
+            return redirect()->route('settings.index')->with('error', 'Google OAuth not configured. Please add your Client ID and Secret to .env file.');
+        }
+        
         $connection = \App\Models\ApiConnection::updateOrCreate(
             ['user_id' => $user->id, 'provider' => $service],
             [
                 'provider_id' => 'google_' . $service . '_' . $user->id,
                 'email' => $user->email,
                 'scopes' => ['https://www.googleapis.com/auth/gmail.readonly'],
-                'metadata' => ['account_name' => ucfirst($service) . ' Account'],
+                'metadata' => [
+                    'account_name' => ucfirst($service) . ' Account',
+                    'client_id' => config('services.google.client_id'),
+                    'redirect_uri' => config('services.google.redirect')
+                ],
                 'is_active' => true,
                 'last_sync_at' => now()
             ]
@@ -107,13 +116,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/auth/spotify', function () {
         $user = auth()->user();
         
+        // Validate Spotify OAuth is configured
+        if (!config('services.spotify.client_id') || config('services.spotify.client_id') === 'your_spotify_client_id_here') {
+            return redirect()->route('settings.index')->with('error', 'Spotify OAuth not configured. Please add your Client ID and Secret to .env file.');
+        }
+        
         \App\Models\ApiConnection::updateOrCreate(
             ['user_id' => $user->id, 'provider' => 'spotify'],
             [
                 'provider_id' => 'spotify_' . $user->id,
                 'email' => $user->email,
                 'scopes' => ['user-read-recently-played'],
-                'metadata' => ['account_name' => 'Spotify Account'],
+                'metadata' => [
+                    'account_name' => 'Spotify Account',
+                    'client_id' => config('services.spotify.client_id'),
+                    'redirect_uri' => config('services.spotify.redirect')
+                ],
                 'is_active' => true,
                 'last_sync_at' => now()
             ]

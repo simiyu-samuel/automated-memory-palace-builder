@@ -46,21 +46,21 @@ export default function Settings({ auth, apiConnections = [] }) {
             case 'Google Photos':
                 return {
                     ...baseFields,
-                    client_id: '',
+                    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
                     client_secret: '',
                     redirect_uri: window.location.origin + '/auth/google/callback'
                 };
             case 'Spotify':
                 return {
                     ...baseFields,
-                    client_id: '',
+                    client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID || '',
                     client_secret: '',
                     redirect_uri: window.location.origin + '/auth/spotify/callback'
                 };
             case 'Location Services':
                 return {
                     ...baseFields,
-                    api_key: '',
+                    api_key: import.meta.env.VITE_LOCATION_API_KEY || '',
                     webhook_url: ''
                 };
             default:
@@ -228,7 +228,7 @@ export default function Settings({ auth, apiConnections = [] }) {
                 <h3 className="font-semibold text-gray-900 mb-2">{provider}</h3>
                 <p className="text-sm text-gray-600 mb-4">{description}</p>
                 <button 
-                    onClick={() => handleConnect(provider.toLowerCase().replace(' ', '_'))}
+                    onClick={() => handleConnect(provider)}
                     className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 >
                     Connect

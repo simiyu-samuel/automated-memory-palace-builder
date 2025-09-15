@@ -49,6 +49,13 @@ php artisan key:generate
 php artisan migrate
 php artisan db:seed --class=MemoryPalaceSeeder
 
+# Environment setup (IMPORTANT)
+# Replace placeholder values in .env with your real API credentials:
+# GOOGLE_CLIENT_ID=your_actual_google_client_id
+# GOOGLE_CLIENT_SECRET=your_actual_google_secret  
+# SPOTIFY_CLIENT_ID=your_actual_spotify_client_id
+# SPOTIFY_CLIENT_SECRET=your_actual_spotify_secret
+
 # Build assets
 npm run build
 
@@ -61,6 +68,19 @@ npm run mcp-server         # MCP server
 - **URL**: http://127.0.0.1:8000
 - **Login**: simiyusamuel869@gmail.com
 - **Password**: password
+
+### 🔗 Connect Your Real Data
+**Want to use YOUR actual emails, photos, and music?**
+
+See [SETUP_REAL_DATA.md](memory-palace-builder/SETUP_REAL_DATA.md) for step-by-step instructions to:
+- Connect Gmail API (your real emails)
+- Connect Spotify API (your music history)
+- Connect Google Calendar (your events)
+- Import your actual digital memories into the 3D palace
+
+**Demo vs Real Data:**
+- **Demo Mode**: Uses sample data (6 fake memories)
+- **Real Data Mode**: Uses YOUR actual digital life
 
 ## 🎮 Features
 
