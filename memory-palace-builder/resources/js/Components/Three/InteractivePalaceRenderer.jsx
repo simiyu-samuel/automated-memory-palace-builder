@@ -53,10 +53,14 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
         scene.fog = new THREE.FogExp2(0x0f0f23, 0.02);
         sceneRef.current = scene;
 
-        // Camera with cinematic feel
-        const camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-        camera.position.set(0, 12, 20);
-        camera.lookAt(0, 0, 0);
+        // Camera with cinematic feel - Adjusted for mobile responsiveness
+        const isMobile = width < 768; // Assuming 768px as a common mobile breakpoint
+        const fov = isMobile ? 70 : 60; // Slightly wider FOV for mobile
+        const initialCameraZ = isMobile ? 15 : 20; // Closer initial position for mobile
+
+        const camera = new THREE.PerspectiveCamera(fov, width / height, 0.1, 1000);
+        camera.position.set(0, 10, initialCameraZ); // Adjusted Y position for better view
+        camera.lookAt(0, 2, 0); // Look slightly above the ground
         cameraRef.current = camera;
 
         // Enhanced renderer
@@ -167,12 +171,13 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
                 y: event.clientY - previousMousePosition.y
             };
 
-            // Smooth camera rotation
+            // Smooth camera rotation - Adjusted sensitivity for mobile
             const spherical = new THREE.Spherical();
             spherical.setFromVector3(camera.position);
             
-            spherical.theta -= deltaMove.x * 0.008;
-            spherical.phi += deltaMove.y * 0.008;
+            const rotationSensitivity = isMobile ? 0.012 : 0.008; // Increased sensitivity for mobile
+            spherical.theta -= deltaMove.x * rotationSensitivity;
+            spherical.phi += deltaMove.y * rotationSensitivity;
             spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
 
             camera.position.setFromSpherical(spherical);
@@ -192,14 +197,18 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
 
         const onWheel = (event) => {
             event.preventDefault();
-            const scale = event.deltaY * 0.001;
+            const zoomSensitivity = isMobile ? 0.002 : 0.001; // Increased sensitivity for mobile
+            const scale = event.deltaY * zoomSensitivity;
             camera.position.multiplyScalar(1 + scale);
             
             const distance = camera.position.length();
-            if (distance < 8) {
-                camera.position.normalize().multiplyScalar(8);
-            } else if (distance > 60) {
-                camera.position.normalize().multiplyScalar(60);
+            const minDistance = isMobile ? 6 : 8; // Closer min zoom for mobile
+            const maxDistance = isMobile ? 40 : 60; // Closer max zoom for mobile
+
+            if (distance < minDistance) {
+                camera.position.normalize().multiplyScalar(minDistance);
+            } else if (distance > maxDistance) {
+                camera.position.normalize().multiplyScalar(maxDistance);
             }
         };
 
@@ -209,6 +218,78 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
         renderer.domElement.addEventListener('click', onClick);
         renderer.domElement.addEventListener('wheel', onWheel, { passive: false });
         renderer.domElement.style.cursor = 'grab';
+
+        // Touch controls for mobile
+        let lastTouchDistance = 0;
+        
+        const onTouchStart = (event) => {
+            if (event.touches.length === 1) {
+                isDragging = true;
+                previousMousePosition = { 
+                    x: event.touches[0].clientX, 
+                    y: event.touches[0].clientY 
+                };
+            } else if (event.touches.length === 2) {
+                const dx = event.touches[0].clientX - event.touches[1].clientX;
+                const dy = event.touches[0].clientY - event.touches[1].clientY;
+                lastTouchDistance = Math.sqrt(dx * dx + dy * dy);
+            }
+        };
+
+        const onTouchMove = (event) => {
+            event.preventDefault();
+            
+            if (event.touches.length === 1) {
+                const deltaMove = {
+                    x: event.touches[0].clientX - previousMousePosition.x,
+                    y: event.touches[0].clientY - previousMousePosition.y
+                };
+
+                const spherical = new THREE.Spherical();
+                spherical.setFromVector3(camera.position);
+                
+                const rotationSensitivity = isMobile ? 0.012 : 0.008; // Increased sensitivity for mobile
+                spherical.theta -= deltaMove.x * rotationSensitivity;
+                spherical.phi += deltaMove.y * rotationSensitivity;
+                spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+
+                camera.position.setFromSpherical(spherical);
+                camera.lookAt(0, 2, 0);
+
+                previousMousePosition = { 
+                    x: event.touches[0].clientX, 
+                    y: event.touches[0].clientY 
+                };
+            } else if (event.touches.length === 2) {
+                const dx = event.touches[0].clientX - event.touches[1].clientX;
+                const dy = event.touches[0].clientY - event.touches[1].clientY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                const zoomSensitivity = isMobile ? 0.015 : 0.01; // Increased sensitivity for mobile
+                const scale = (lastTouchDistance - distance) * zoomSensitivity;
+                camera.position.multiplyScalar(1 + scale);
+                
+                const cameraDistance = camera.position.length();
+                const minDistance = isMobile ? 6 : 8; // Closer min zoom for mobile
+                const maxDistance = isMobile ? 40 : 60; // Closer max zoom for mobile
+
+                if (cameraDistance < minDistance) {
+                    camera.position.normalize().multiplyScalar(minDistance);
+                } else if (cameraDistance > maxDistance) {
+                    camera.position.normalize().multiplyScalar(maxDistance);
+                }
+                
+                lastTouchDistance = distance;
+            }
+        };
+
+        const onTouchEnd = () => {
+            isDragging = false;
+        };
+
+        renderer.domElement.addEventListener('touchstart', onTouchStart);
+        renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: false });
+        renderer.domElement.addEventListener('touchend', onTouchEnd);
     };
 
     const addRoomInteraction = () => {
@@ -685,13 +766,12 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
             
             <div 
                 ref={mountRef} 
-                className="three-canvas w-full h-full"
-                style={{ minHeight: '500px' }}
+                className="three-canvas w-full h-80 md:h-full"
             />
             
             {/* Memory Detail Modal */}
             {selectedMemory && (
-                <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg max-w-sm z-20">
+                <div className="absolute inset-x-4 top-4 sm:top-4 sm:right-4 bg-black/80 backdrop-blur-sm text-white p-4 rounded-lg max-w-sm z-20 max-h-[calc(100vh-2rem)] overflow-y-auto">
                     <button 
                         onClick={() => setSelectedMemory(null)}
                         className="absolute top-2 right-2 text-gray-400 hover:text-white"
@@ -709,7 +789,7 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
             )}
             
             {/* Controls Help */}
-            <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white p-3 rounded-lg text-sm z-20">
+            <div className="absolute inset-x-4 bottom-4 sm:bottom-4 sm:left-4 bg-black/60 backdrop-blur-sm text-white p-3 rounded-lg text-sm z-20">
                 <div className="font-semibold mb-1">🎮 Controls:</div>
                 <div>🖱️ Drag to rotate • 🎯 Click objects to view • 🔍 Scroll to zoom</div>
             </div>
