@@ -409,8 +409,7 @@ export default function PalaceRenderer({ rooms = [], memories = [], onObjectClic
             )}
             <div 
                 ref={mountRef} 
-                className="three-canvas w-full h-full"
-                style={{ minHeight: '400px' }}
+                className="three-canvas w-full h-80 md:h-full"
             />
         </div>
     );
