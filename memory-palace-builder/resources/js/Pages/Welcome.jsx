@@ -58,91 +58,124 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                 <main className="relative z-10 px-6 pt-20 pb-32">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-20">
-                            <div className="mb-8">
-                                <h1 className="text-8xl mb-4">🏰</h1>
+                            <div className="mb-8 animate-bounce">
+                                <div className="text-9xl mb-4 drop-shadow-2xl">🏰</div>
                             </div>
-                            <h1 className="text-6xl md:text-7xl font-bold hero-text mb-6">
+                            <h1 className="text-6xl md:text-8xl font-bold hero-text mb-8 drop-shadow-lg">
                                 Memory Palace
                             </h1>
-                            <p className="text-2xl md:text-3xl text-white/80 mb-8 max-w-4xl mx-auto">
-                                Transform your digital life into an immersive 3D experience
-                            </p>
-                            <p className="text-lg text-white/70 mb-12 max-w-2xl mx-auto">
-                                Automatically convert your daily digital activities into a navigable 3D virtual palace where memories are stored as interactive objects.
-                            </p>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-8 max-w-5xl mx-auto border border-white/20">
+                                <p className="text-2xl md:text-3xl text-white mb-6 font-medium">
+                                    🤖 The world's first <span className="text-palace-gold font-bold">FULLY AUTOMATED</span> memory palace
+                                </p>
+                                <p className="text-lg text-white/90 leading-relaxed">
+                                    Transform your emails, photos, and events into an interactive 3D palace where memories are spatially organized and visually explored. <span className="text-palace-gold font-semibold">No manual setup required</span> - connect your APIs and watch your palace generate automatically!
+                                </p>
+                            </div>
                             
                             {!auth.user && (
-                                <div className="flex justify-center space-x-6">
+                                <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6">
                                     <Link
                                         href={route('register')}
-                                        className="palace-btn-primary text-lg px-8 py-4"
+                                        className="palace-btn-primary text-xl px-10 py-5 transform hover:scale-105 transition-all duration-200 shadow-2xl"
                                     >
-                                        Build Your Palace
+                                        🚀 Build Your Palace Free
                                     </Link>
                                     <Link
                                         href={route('login')}
-                                        className="palace-btn-secondary text-lg px-8 py-4"
+                                        className="palace-btn-secondary text-xl px-10 py-5 transform hover:scale-105 transition-all duration-200"
                                     >
-                                        Sign In
+                                        🔑 Sign In
+                                    </Link>
+                                </div>
+                            )}
+                            
+                            {auth.user && (
+                                <div className="text-center">
+                                    <Link
+                                        href={route('palace.index')}
+                                        className="palace-btn-primary text-xl px-12 py-6 transform hover:scale-105 transition-all duration-200 shadow-2xl"
+                                    >
+                                        🏰 Enter Your Palace
                                     </Link>
                                 </div>
                             )}
                         </div>
 
-                        {/* Features Grid */}
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
-                            {/* AI-Powered Processing */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">🤖</div>
-                                <h3 className="text-xl font-bold text-white mb-4">AI-Powered Processing</h3>
-                                <p className="text-white/70">
-                                    Advanced AI automatically processes your digital activities, extracting meaningful patterns and creating immersive 3D representations.
+                        {/* Features Section */}
+                        <div className="mb-20">
+                            <div className="text-center mb-12">
+                                <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">✨ What Makes This Special</h2>
+                                <p className="text-xl text-white/80 max-w-3xl mx-auto">
+                                    Unlike traditional memory palace builders that require hours of manual setup, this system is <span className="text-palace-gold font-semibold">fully automated</span>
                                 </p>
                             </div>
+                            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {/* AI-Powered Processing */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-palace-gold/20">
+                                    <div className="text-5xl mb-6">🤖</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">Automatically Generates 3D Objects</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • AI-powered room assignment based on content analysis<br/>
+                                        • Dynamic visual styling using sentiment analysis<br/>
+                                        • Real-time updates as new memories are collected
+                                    </p>
+                                </div>
 
-                            {/* Multiple Data Sources */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">🔗</div>
-                                <h3 className="text-xl font-bold text-white mb-4">Multiple Data Sources</h3>
-                                <p className="text-white/70">
-                                    Connect Gmail, Google Calendar, Photos, Spotify, and more. Your palace grows automatically as you live your digital life.
-                                </p>
-                            </div>
+                                {/* Multiple Data Sources */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-memory-purple/20">
+                                    <div className="text-5xl mb-6">🔗</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">Multi-API Integration</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • Gmail, Calendar, Spotify, Photos<br/>
+                                        • Automated workflows via MCP servers<br/>
+                                        • Built for Postman Web Dev Challenge
+                                    </p>
+                                </div>
 
-                            {/* 3D Visualization */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">🌐</div>
-                                <h3 className="text-xl font-bold text-white mb-4">3D Visualization</h3>
-                                <p className="text-white/70">
-                                    Navigate through beautifully crafted 3D rooms where your memories are organized spatially and thematically.
-                                </p>
-                            </div>
+                                {/* 3D Visualization */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-blue-400/20">
+                                    <div className="text-5xl mb-6">🌐</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">Interactive 3D Navigation</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • Orbital controls with zoom and hover effects<br/>
+                                        • Three.js powered 3D engine<br/>
+                                        • Spatially organized memory objects
+                                    </p>
+                                </div>
 
-                            {/* Real-time Updates */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">⚡</div>
-                                <h3 className="text-xl font-bold text-white mb-4">Real-time Updates</h3>
-                                <p className="text-white/70">
-                                    Your palace evolves in real-time as new memories are created, processed, and automatically placed in themed rooms.
-                                </p>
-                            </div>
+                                {/* Real-time Updates */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-green-400/20">
+                                    <div className="text-5xl mb-6">⚡</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">Zero Manual Setup</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • Palace builds itself from your data<br/>
+                                        • Instant results - working palace in seconds<br/>
+                                        • No hours of manual configuration needed
+                                    </p>
+                                </div>
 
-                            {/* Privacy First */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">🛡️</div>
-                                <h3 className="text-xl font-bold text-white mb-4">Privacy First</h3>
-                                <p className="text-white/70">
-                                    Your memories are yours. Advanced encryption and granular privacy controls keep your data secure and private.
-                                </p>
-                            </div>
+                                {/* Privacy First */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-red-400/20">
+                                    <div className="text-5xl mb-6">🛡️</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">Smart Search & Analytics</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • Full-text search across all memories<br/>
+                                        • Advanced filters by type, sentiment, date<br/>
+                                        • Memory statistics and trends
+                                    </p>
+                                </div>
 
-                            {/* Insights & Patterns */}
-                            <div className="glass-card p-8 text-center">
-                                <div className="text-4xl mb-4">💡</div>
-                                <h3 className="text-xl font-bold text-white mb-4">Insights & Patterns</h3>
-                                <p className="text-white/70">
-                                    Discover hidden patterns in your life, get personalized insights, and understand your digital habits like never before.
-                                </p>
+                                {/* Insights & Patterns */}
+                                <div className="glass-card p-8 text-center hover:scale-105 transition-all duration-300 border border-yellow-400/20">
+                                    <div className="text-5xl mb-6">💡</div>
+                                    <h3 className="text-2xl font-bold text-white mb-4">MCP Server Integration</h3>
+                                    <p className="text-white/80 leading-relaxed">
+                                        • Custom MCP server with 3 specialized tools<br/>
+                                        • Automated data collection from APIs<br/>
+                                        • Dynamic 3D object generation
+                                    </p>
+                                </div>
                             </div>
                         </div>
 

@@ -25,7 +25,12 @@ export default function Login({ status, canResetPassword }) {
                 <div className="mb-4 text-green-400 text-sm">{status}</div>
             )}
 
-            <form onSubmit={submit} className="space-y-5">
+            <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">🔑 Welcome Back</h2>
+                <p className="text-white/70">Enter your palace and explore your memories</p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-6">
                 <PalaceInput
                     label="Email"
                     type="email"
@@ -80,17 +85,17 @@ export default function Login({ status, canResetPassword }) {
 
                 <PalaceButton 
                     type="submit" 
-                    className="w-full" 
+                    className="w-full text-lg py-4" 
                     disabled={processing}
                     loading={processing}
                 >
-                    Sign in
+                    🏰 Enter Your Palace
                 </PalaceButton>
 
-                <div className="text-center">
+                <div className="text-center pt-4 border-t border-white/10">
                     <span className="text-white/70 text-sm">Don't have an account?</span>
-                    <Link href={route('register')} className="ml-2 palace-link text-sm">
-                        Create your palace
+                    <Link href={route('register')} className="ml-2 palace-link text-sm font-semibold">
+                        🚀 Create your palace
                     </Link>
                 </div>
             </form>

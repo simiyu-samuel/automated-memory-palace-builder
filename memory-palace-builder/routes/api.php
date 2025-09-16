@@ -3,7 +3,10 @@
 use App\Http\Controllers\API\MemoryController;
 use App\Http\Controllers\API\ApiConnectionController;
 use App\Http\Controllers\API\PalaceDataController;
+use App\Http\Controllers\API\GmailSyncController;
 use Illuminate\Support\Facades\Route;
+
+
 
 // API routes protected by web middleware (uses session authentication)
 Route::middleware(['web', 'auth'])->group(function () {
@@ -11,13 +14,13 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Memory Management API
     Route::apiResource('memories', MemoryController::class);
     
-    // API Connection Management
+    // API Connection Management  
     Route::post('connections', function(\Illuminate\Http\Request $request) {
         $user = auth()->user();
         
         $validated = $request->validate([
             'provider' => 'required|string',
-            'email' => 'required|email',
+            'email' => 'required|string', // Allow non-email for Spotify usernames
             'client_id' => 'nullable|string',
             'client_secret' => 'nullable|string',
             'account_name' => 'required|string',
@@ -39,11 +42,47 @@ Route::middleware(['web', 'auth'])->group(function () {
                 'client_secret' => $validated['client_secret'] ?? null,
                 'setup_method' => 'manual'
             ],
-            'is_active' => true,
-            'last_sync_at' => now()
+            'is_active' => false, // Will be activated after OAuth
+            'last_sync_at' => null
         ]);
         
-        return response()->json(['message' => 'Connection created successfully', 'connection' => $connection]);
+        // Generate OAuth URL using services
+        $oauthUrl = null;
+        $state = base64_encode(json_encode(['connection_id' => $connection->id, 'provider' => $validated['provider']]));
+        
+        try {
+            if (in_array($validated['provider'], ['gmail', 'google_calendar', 'google_photos'])) {
+                if (config('services.google.client_id') && config('services.google.client_secret')) {
+                    $googleService = new \App\Services\GoogleOAuthService();
+                    $oauthUrl = $googleService->getAuthUrl($validated['scopes'] ?? [], $state);
+                } else {
+                    \Log::warning('Google OAuth credentials not configured');
+                }
+            } elseif ($validated['provider'] === 'spotify') {
+                if (config('services.spotify.client_id') && config('services.spotify.client_secret')) {
+                    $spotifyService = new \App\Services\SpotifyService();
+                    $oauthUrl = $spotifyService->getAuthUrl($state);
+                } else {
+                    \Log::warning('Spotify OAuth credentials not configured');
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('OAuth URL generation failed: ' . $e->getMessage());
+            // Continue without OAuth URL - user will need to set up credentials
+        }
+        
+        $response = [
+            'message' => 'Connection created successfully', 
+            'connection' => $connection,
+            'oauth_url' => $oauthUrl
+        ];
+        
+        if (!$oauthUrl) {
+            $response['setup_required'] = true;
+            $response['instructions'] = "Please add {$validated['provider']} credentials to your .env file and restart the server";
+        }
+        
+        return response()->json($response);
     });
     
     Route::put('connections/{connection}', function(\Illuminate\Http\Request $request, $connectionId) {
@@ -77,10 +116,53 @@ Route::middleware(['web', 'auth'])->group(function () {
         return response()->json(['message' => 'Connection updated successfully', 'connection' => $connection]);
     });
     
-    Route::post('connections/{connection}/sync', function($connectionId) {
-        $connection = \App\Models\ApiConnection::where('user_id', auth()->id())->findOrFail($connectionId);
-        $connection->update(['last_sync_at' => now()]);
-        return response()->json(['message' => 'Sync completed successfully']);
+    // MCP-based sync routes
+    Route::post('connections/{connection}/sync', [\App\Http\Controllers\API\MCPSyncController::class, 'syncViaMP']);
+    Route::post('connections/{connection}/refresh-token', function(\App\Models\ApiConnection $connection) {
+        $tokenService = new \App\Services\TokenRefreshService();
+        try {
+            $accessToken = $tokenService->ensureValidToken($connection);
+            return response()->json(['access_token' => $accessToken]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    });
+
+    Route::post('sync-all', [\App\Http\Controllers\API\MCPSyncController::class, 'syncViaMP']);
+    Route::post('search-mcp', [\App\Http\Controllers\API\MCPSyncController::class, 'searchViaMP']);
+    
+    // Legacy sync routes (fallback)
+    Route::post('connections/{connection}/sync-direct', [\App\Http\Controllers\API\SyncController::class, 'syncConnection']);
+    Route::post('sync-all-direct', [\App\Http\Controllers\API\SyncController::class, 'syncAll']);
+    Route::get('connections/{connection}/status', [\App\Http\Controllers\API\SyncController::class, 'getConnectionStatus']);
+    
+    // Test routes for MCP integration
+    Route::post('test-sync', [\App\Http\Controllers\API\TestController::class, 'testSync']);
+    Route::get('test-mcp', [\App\Http\Controllers\API\TestController::class, 'testMcpFlow']);
+    
+    // Production Gmail sync route
+    Route::post('simple-sync/{connectionId}', function($connectionId) {
+        $user = auth()->user();
+        $connection = \App\Models\ApiConnection::where('user_id', $user->id)->find($connectionId);
+        
+        if (!$connection || !$connection->is_active || !$connection->access_token) {
+            return response()->json(['error' => 'Connection not found or not authorized'], 404);
+        }
+        
+        try {
+            $memoryService = app(\App\Services\MemoryCollectionService::class);
+            $memoriesImported = $memoryService->collectFromConnection($connection);
+            
+            return response()->json([
+                'message' => 'Real Gmail data synced successfully',
+                'memories_imported' => $memoriesImported,
+                'total_memories' => $user->memories()->count(),
+                'provider' => $connection->provider
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Gmail sync error: ' . $e->getMessage());
+            return response()->json(['error' => 'Sync failed: ' . $e->getMessage()], 500);
+        }
     });
     
     Route::delete('connections/{connection}', function($connectionId) {
@@ -96,6 +178,7 @@ Route::middleware(['web', 'auth'])->group(function () {
     
     // API Connection Management
     Route::apiResource('api-connections', ApiConnectionController::class);
+
     Route::post('api-connections/{apiConnection}/refresh-token', [ApiConnectionController::class, 'refreshToken']);
     Route::post('api-connections/{apiConnection}/test', [ApiConnectionController::class, 'test']);
     Route::post('api-connections/{apiConnection}/sync', [ApiConnectionController::class, 'sync']);
@@ -241,13 +324,14 @@ Route::middleware(['web', 'auth'])->group(function () {
         
         $jobsDispatched = 0;
         foreach ($connections as $connection) {
-            \App\Jobs\AI\DataCollectionJob::dispatch($connection);
+            \App\Jobs\CollectMemoriesJob::dispatch($connection);
             $jobsDispatched++;
         }
         
         return response()->json([
             'message' => "Data collection started for {$jobsDispatched} connections",
-            'jobs_dispatched' => $jobsDispatched
+            'jobs_dispatched' => $jobsDispatched,
+            'providers' => $connections->pluck('provider')->toArray()
         ]);
     })->name('collect-memories.manual');
     
@@ -306,6 +390,98 @@ Route::middleware(['web', 'auth'])->group(function () {
         
         return response()->json($memories);
     })->name('memories.advanced-search');
+});
+
+// MCP Server endpoints (no auth required)
+Route::get('users/{user}/connections', function($userId) {
+    $connections = \App\Models\ApiConnection::where('user_id', $userId)
+        ->where('is_active', true)
+        ->get();
+    return response()->json(['data' => $connections]);
+});
+
+Route::post('memories', function(\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'title' => 'required|string',
+        'content' => 'nullable|string',
+        'type' => 'required|string',
+        'user_id' => 'required|integer',
+        'api_connection_id' => 'nullable|integer',
+        'source_data' => 'nullable|array',
+        'memory_date' => 'required|date',
+        'sentiment' => 'nullable|string'
+    ]);
+    
+    $memory = \App\Models\Memory::create($validated);
+    return response()->json($memory, 201);
+});
+
+Route::post('connections/{connectionId}/refresh-token', function($connectionId) {
+    $connection = \App\Models\ApiConnection::findOrFail($connectionId);
+    $tokenService = new \App\Services\TokenRefreshService();
+    try {
+        $accessToken = $tokenService->ensureValidToken($connection);
+        return response()->json(['access_token' => $accessToken]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 400);
+    }
+});
+
+Route::get('palace-rooms', function(\Illuminate\Http\Request $request) {
+    $userId = $request->get('user_id');
+    $name = $request->get('name');
+    
+    $query = \App\Models\PalaceRoom::query();
+    
+    if ($userId) {
+        $query->where('user_id', $userId);
+    }
+    
+    if ($name) {
+        $query->where('name', $name);
+    }
+    
+    $rooms = $query->get();
+    return response()->json($rooms);
+});
+
+Route::post('palace-rooms', function(\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'user_id' => 'required|integer',
+        'name' => 'required|string',
+        'description' => 'nullable|string',
+        'theme' => 'nullable|string',
+        'mood' => 'nullable|string',
+        'color_scheme' => 'nullable|array',
+        'position' => 'nullable|array',
+        'dimensions' => 'nullable|array',
+        'lighting' => 'nullable|array',
+        'connections' => 'nullable|array',
+        'is_active' => 'boolean'
+    ]);
+    
+    $room = \App\Models\PalaceRoom::create($validated);
+    return response()->json($room, 201);
+});
+
+Route::post('memory-objects', function(\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'memory_id' => 'required|integer',
+        'palace_room_id' => 'required|integer',
+        'object_type' => 'required|string',
+        'title' => 'required|string',
+        'description' => 'nullable|string',
+        'position' => 'required|array',
+        'rotation' => 'nullable|array',
+        'scale' => 'nullable|array',
+        'color' => 'nullable|array',
+        'importance_score' => 'nullable|numeric',
+        'is_visible' => 'boolean',
+        'is_interactive' => 'boolean'
+    ]);
+    
+    $object = \App\Models\MemoryObject::create($validated);
+    return response()->json($object, 201);
 });
 
 // Health check endpoint (no auth required)

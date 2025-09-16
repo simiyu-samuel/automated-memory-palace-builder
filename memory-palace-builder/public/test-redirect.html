@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Redirect Test</title>
+</head>
+<body>
+    <h1>Simple Redirect Test</h1>
+    <button onclick="testRedirect()">Test Redirect</button>
+    <button onclick="testWindow()">Test Window Open</button>
+    <div id="log"></div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('log').innerHTML += '<p>' + msg + '</p>';
+            console.log(msg);
+        }
+
+        function testRedirect() {
+            const url = 'https://accounts.spotify.com/authorize?client_id=6fcb1e0a9bff4311b705cb8d7df8a5de&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A8000%2Fauth%2Fspotify%2Fcallback&scope=user-read-recently-played+user-library-read+user-top-read&state=test123';
+            
+            log('Attempting redirect to: ' + url);
+            
+            try {
+                window.location.href = url;
+                log('Redirect command executed');
+            } catch (error) {
+                log('Redirect error: ' + error.message);
+            }
+        }
+
+        function testWindow() {
+            const url = 'https://accounts.spotify.com/authorize?client_id=6fcb1e0a9bff4311b705cb8d7df8a5de&response_type=code&redirect_uri=http%3A%2F%2F127.0.0.1%3A8000%2Fauth%2Fspotify%2Fcallback&scope=user-read-recently-played+user-library-read+user-top-read&state=test123';
+            
+            log('Attempting window.open to: ' + url);
+            
+            try {
+                window.open(url, '_self');
+                log('Window.open command executed');
+            } catch (error) {
+                log('Window.open error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

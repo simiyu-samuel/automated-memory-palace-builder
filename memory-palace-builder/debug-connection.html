@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Spotify Connection</title>
+</head>
+<body>
+    <h1>Test Spotify Connection Creation</h1>
+    
+    <button onclick="testConnection()">Test Spotify Connection</button>
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const data = {
+                provider: 'spotify',
+                email: 'test@spotify.com',
+                account_name: 'Test Spotify Account',
+                scopes: ['user-read-recently-played', 'user-library-read']
+            };
+
+            try {
+                const response = await fetch('/api/v1/connections', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || 'test'
+                    },
+                    body: JSON.stringify(data),
+                    credentials: 'same-origin'
+                });
+
+                const result = await response.json();
+                document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                
+                if (result.oauth_url) {
+                    console.log('OAuth URL found:', result.oauth_url);
+                    if (confirm('Redirect to OAuth?')) {
+                        window.location.href = result.oauth_url;
+                    }
+                }
+            } catch (error) {
+                document.getElementById('result').innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</body>
+</html>

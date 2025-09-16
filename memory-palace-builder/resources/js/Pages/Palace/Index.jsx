@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
-import PalaceViewer from '@/Components/Palace/PalaceViewer';
+import GamePalaceRenderer from '@/Components/Three/GamePalaceRenderer';
 import MemoryModal from '@/Components/Palace/MemoryModal';
 import Dashboard from '@/Components/Palace/Dashboard';
 import axios from 'axios';
@@ -61,6 +61,10 @@ export default function Index({ auth, rooms: initialRooms = [], memories: initia
 
     const handleRoomChange = (room) => {
         setCurrentRoom(room);
+        // Reload 3D data when room changes to filter memories
+        if (view === '3d') {
+            load3DData();
+        }
     };
 
     const handleNavigate = (destination) => {
@@ -149,20 +153,77 @@ export default function Index({ auth, rooms: initialRooms = [], memories: initia
                                         <div className="text-gray-600">Loading 3D Palace...</div>
                                     </div>
                                 ) : (
-                                    <PalaceViewer
+                                    <GamePalaceRenderer
                                         rooms={rooms}
-                                        memoryObjects={memoryObjects}
+                                        memories={memoryObjects}
                                         onObjectClick={handleObjectClick}
-                                        onRoomChange={handleRoomChange}
                                     />
                                 )}
                             </div>
                             
-                            {/* Interactive Controls */}
+                            {/* Room Navigation & Controls */}
                             <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border-t">
+                                {/* Room Navigation */}
+                                <div className="mb-4">
+                                    <div className="text-sm font-semibold text-gray-700 mb-2">🏰 Palace Rooms:</div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => handleRoomChange(null)}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                                                !currentRoom 
+                                                    ? 'bg-purple-600 text-white shadow-lg' 
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                                            }`}
+                                        >
+                                            🌟 All Rooms
+                                        </button>
+                                        <button
+                                            onClick={() => handleRoomChange({ name: 'Work Space', id: 'work_space' })}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                                                currentRoom?.name === 'Work Space' 
+                                                    ? 'bg-blue-600 text-white shadow-lg' 
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                                            }`}
+                                        >
+                                            💼 Work Space
+                                        </button>
+                                        <button
+                                            onClick={() => handleRoomChange({ name: 'Personal Space', id: 'personal_space' })}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                                                currentRoom?.name === 'Personal Space' 
+                                                    ? 'bg-green-600 text-white shadow-lg' 
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                                            }`}
+                                        >
+                                            🏠 Personal Space
+                                        </button>
+                                        <button
+                                            onClick={() => handleRoomChange({ name: 'Creative Space', id: 'creative_space' })}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                                                currentRoom?.name === 'Creative Space' 
+                                                    ? 'bg-yellow-600 text-white shadow-lg' 
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                                            }`}
+                                        >
+                                            🎨 Creative Space
+                                        </button>
+                                        <button
+                                            onClick={() => handleRoomChange({ name: 'Archive Space', id: 'archive_space' })}
+                                            className={`px-3 py-1 rounded-full text-sm transition-all ${
+                                                currentRoom?.name === 'Archive Space' 
+                                                    ? 'bg-red-600 text-white shadow-lg' 
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100 border'
+                                            }`}
+                                        >
+                                            📚 Archive Space
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                {/* Interactive Controls */}
                                 <div className="flex justify-between items-center">
                                     <div className="text-sm text-gray-700">
-                                        🖱️ <strong>Drag:</strong> Orbit camera • 🔍 <strong>Scroll:</strong> Zoom • ✨ <strong>Click:</strong> Interact with memories
+                                        🖱️ <strong>Drag:</strong> Orbit • 🔍 <strong>Scroll:</strong> Zoom • 🏰 <strong>Click Rooms:</strong> Navigate • ✨ <strong>Click Objects:</strong> View Details
                                     </div>
                                     <div className="space-x-2">
                                         {!auth.user && (

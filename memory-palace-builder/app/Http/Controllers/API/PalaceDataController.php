@@ -40,40 +40,31 @@ class PalaceDataController extends Controller
     {
         $user = Auth::user();
         
-        $memories = Memory::where('user_id', $user->id)
-            ->where('is_processed', true)
-            ->with('memoryObjects')
+        $objects = MemoryObject::whereHas('memory', function($query) use ($user) {
+                $query->where('user_id', $user->id)->where('is_processed', true);
+            })
+            ->with('memory')
             ->get()
-            ->map(function ($memory) {
-                $objects = $memory->memoryObjects->map(function ($obj) {
-                    return [
+            ->map(function ($obj) {
+                return [
+                    'memory_id' => $obj->memory_id,
+                    'title' => $obj->title,
+                    'type' => $obj->object_type,
+                    'room_id' => $obj->palace_room_id,
+                    'sentiment' => $obj->memory->sentiment ?? 'neutral',
+                    'description' => $obj->description,
+                    'objects' => [[
                         'id' => $obj->id,
                         'type' => $obj->object_type,
                         'position' => $obj->position ?? ['x' => 0, 'y' => 0, 'z' => 0],
                         'rotation' => $obj->rotation ?? ['x' => 0, 'y' => 0, 'z' => 0],
                         'scale' => $obj->scale ?? ['x' => 1, 'y' => 1, 'z' => 1],
                         'color' => is_array($obj->color) ? ($obj->color['primary'] ?? '#ffffff') : ($obj->color ?? '#ffffff'),
-                    ];
-                });
-
-                return [
-                    'memory_id' => $memory->id,
-                    'title' => $memory->title,
-                    'type' => $memory->type,
-                    'sentiment' => $memory->sentiment,
-                    'sentiment_score' => $memory->sentiment_score,
-                    'room_id' => $memory->palace_room_id,
-                    'objects' => $objects,
-                    'metadata' => [
-                        'date' => $memory->memory_date->toISOString(),
-                        'tags' => $memory->tags ?? [],
-                        'people' => $memory->people ?? [],
-                        'location' => $memory->location,
-                    ]
+                    ]]
                 ];
             });
 
-        return response()->json(['memory_objects' => $memories]);
+        return response()->json(['memory_objects' => $objects]);
     }
 
     public function updateRoomLayout(Request $request, $roomId)

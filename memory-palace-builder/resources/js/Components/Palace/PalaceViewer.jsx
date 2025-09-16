@@ -349,7 +349,30 @@ const PalaceViewer = ({ rooms = [], memoryObjects = [], onObjectClick, onRoomCha
                     // Click effect
                     clickedObject.scale.setScalar(1.2);
                     setTimeout(() => clickedObject.scale.setScalar(1), 200);
-                    onObjectClick(clickedObject.userData.memoryData);
+                    
+                    // Get full memory data
+                    const memoryData = {
+                        ...clickedObject.userData.memoryData,
+                        title: clickedObject.userData.memoryData.title || 'Memory Object',
+                        description: clickedObject.userData.memoryData.description || 'Interactive 3D memory object',
+                        type: clickedObject.userData.memoryData.type || 'memory',
+                        sentiment: clickedObject.userData.memoryData.memory?.sentiment || 'neutral',
+                        sentiment_score: clickedObject.userData.memoryData.memory?.sentiment_score || 0,
+                        metadata: {
+                            date: clickedObject.userData.memoryData.memory?.memory_date,
+                            tags: clickedObject.userData.memoryData.memory?.tags || [],
+                            people: clickedObject.userData.memoryData.memory?.people || [],
+                            location: clickedObject.userData.memoryData.memory?.location
+                        },
+                        objects: [{
+                            type: clickedObject.userData.memoryData.object_type,
+                            color: clickedObject.userData.memoryData.color?.primary || '#00ff00',
+                            position: clickedObject.userData.memoryData.position
+                        }]
+                    };
+                    
+                    console.log('Clicked memory data:', memoryData);
+                    onObjectClick(memoryData);
                 }
             }
         };

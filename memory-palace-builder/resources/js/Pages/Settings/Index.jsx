@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head } from '@inertiajs/react';
+import Toast from '@/Components/Toast';
 
 export default function Settings({ auth, apiConnections = [] }) {
     const [activeTab, setActiveTab] = useState('connections');
     const [showConnectionModal, setShowConnectionModal] = useState(false);
     const [selectedProvider, setSelectedProvider] = useState(null);
     const [connectionForm, setConnectionForm] = useState({});
+    const [toast, setToast] = useState(null);
+    const [syncingConnections, setSyncingConnections] = useState(new Set());
     
+    const showToast = (message, type = 'info') => {
+        setToast({ message, type });
+    };
+
     const handleConnect = (provider) => {
         setSelectedProvider(provider);
         setConnectionForm(getProviderFields(provider));
@@ -32,40 +39,23 @@ export default function Settings({ auth, apiConnections = [] }) {
     };
     
     const getProviderFields = (provider) => {
+        const providerMap = {
+            'Gmail': 'gmail',
+            'Google Calendar': 'google_calendar', 
+            'Google Photos': 'google_photos',
+            'Spotify': 'spotify',
+            'Location Services': 'location_services'
+        };
+        
         const baseFields = {
-            provider: provider.toLowerCase().replace(' ', '_'),
+            provider: providerMap[provider] || provider.toLowerCase().replace(' ', '_'),
             email: '',
             account_name: provider + ' Account',
             scopes: getDefaultScopes(provider),
             sync_frequency: 'hourly'
         };
         
-        switch (provider) {
-            case 'Gmail':
-            case 'Google Calendar':
-            case 'Google Photos':
-                return {
-                    ...baseFields,
-                    client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
-                    client_secret: '',
-                    redirect_uri: window.location.origin + '/auth/google/callback'
-                };
-            case 'Spotify':
-                return {
-                    ...baseFields,
-                    client_id: import.meta.env.VITE_SPOTIFY_CLIENT_ID || '',
-                    client_secret: '',
-                    redirect_uri: window.location.origin + '/auth/spotify/callback'
-                };
-            case 'Location Services':
-                return {
-                    ...baseFields,
-                    api_key: import.meta.env.VITE_LOCATION_API_KEY || '',
-                    webhook_url: ''
-                };
-            default:
-                return baseFields;
-        }
+        return baseFields;
     };
     
     const getDefaultScopes = (provider) => {
@@ -81,46 +71,89 @@ export default function Settings({ auth, apiConnections = [] }) {
     
     const handleSubmitConnection = async (e) => {
         e.preventDefault();
+        console.log('Form submission started', { connectionForm, selectedProvider });
+        
         try {
             const url = connectionForm.id ? `/api/v1/connections/${connectionForm.id}` : '/api/v1/connections';
             const method = connectionForm.id ? 'PUT' : 'POST';
+            
+            console.log('Making request to:', url, 'with data:', connectionForm);
+            
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            console.log('CSRF Token:', csrfToken);
+            
+            if (!csrfToken) {
+                throw new Error('CSRF token not found');
+            }
             
             const response = await fetch(url, {
                 method,
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
-                body: JSON.stringify(connectionForm)
+                body: JSON.stringify(connectionForm),
+                credentials: 'same-origin'
             });
             
+            console.log('Response status:', response.status);
+            
             if (response.ok) {
-                alert(connectionForm.id ? 'Connection updated successfully!' : 'Connection created successfully!');
-                setShowConnectionModal(false);
-                window.location.reload();
+                const result = await response.json();
+                console.log('Success response:', result);
+                
+                if (!connectionForm.id && result.oauth_url) {
+                    console.log('OAuth URL found, redirecting to:', result.oauth_url);
+                    setShowConnectionModal(false);
+                    window.location.href = result.oauth_url;
+                } else {
+                    showToast(connectionForm.id ? 'Connection updated successfully!' : 'Connection created successfully!', 'success');
+                    setShowConnectionModal(false);
+                    setTimeout(() => window.location.reload(), 1500);
+                }
             } else {
                 const error = await response.json();
-                alert('Operation failed: ' + (error.message || 'Unknown error'));
+                console.log('Error response:', error);
+                showToast('Operation failed: ' + (error.message || 'Unknown error'), 'error');
             }
         } catch (error) {
-            alert('Operation failed: ' + error.message);
+            console.error('Connection creation error:', error);
+            showToast('Operation failed: ' + error.message, 'error');
         }
     };
     
     const handleSync = async (connectionId) => {
+        setSyncingConnections(prev => new Set([...prev, connectionId]));
+        showToast('🔄 Sync in progress via MCP server... Fetching your latest data', 'info');
+        
         try {
             const response = await fetch(`/api/v1/connections/${connectionId}/sync`, {
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
             });
+            
+            const data = await response.json();
+            
             if (response.ok) {
-                alert('Sync started successfully!');
-                window.location.reload();
+                showToast(`✅ ${data.message} - ${data.memories_created || 0} new memories via MCP!`, 'success');
+                setTimeout(() => window.location.reload(), 2000);
+            } else {
+                showToast('❌ MCP Sync failed: ' + (data.error || 'Unknown error'), 'error');
             }
         } catch (error) {
-            alert('Sync failed. Please try again.');
+            showToast('❌ MCP Sync failed: ' + error.message, 'error');
+        } finally {
+            setSyncingConnections(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(connectionId);
+                return newSet;
+            });
         }
     };
     
@@ -134,11 +167,11 @@ export default function Settings({ auth, apiConnections = [] }) {
                     }
                 });
                 if (response.ok) {
-                    alert('Service disconnected successfully!');
-                    window.location.reload();
+                    showToast('Service disconnected successfully!', 'success');
+                    setTimeout(() => window.location.reload(), 1500);
                 }
             } catch (error) {
-                alert('Disconnect failed. Please try again.');
+                showToast('Disconnect failed. Please try again.', 'error');
             }
         }
     };
@@ -164,8 +197,10 @@ export default function Settings({ auth, apiConnections = [] }) {
             return icons[provider] || '🔗';
         };
 
+        const isSync = syncingConnections.has(connection.id);
+
         return (
-            <div className="bg-white rounded-lg shadow p-6">
+            <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
                 <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                         <span className="text-2xl">{getProviderIcon(connection.provider)}</span>
@@ -176,8 +211,8 @@ export default function Settings({ auth, apiConnections = [] }) {
                             <p className="text-sm text-gray-600">{connection.email || connection.metadata?.account_name || 'Connected Account'}</p>
                         </div>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(connection.is_active ? 'active' : 'inactive')}`}>
-                        {connection.is_active ? 'Active' : 'Inactive'}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(connection.is_active ? 'active' : 'inactive')}`}>
+                        {connection.is_active ? '✅ Active' : '⚠️ Inactive'}
                     </span>
                 </div>
 
@@ -193,28 +228,43 @@ export default function Settings({ auth, apiConnections = [] }) {
                     </div>
                     <div className="flex justify-between text-sm">
                         <span className="text-gray-600">Memories Collected:</span>
-                        <span className="text-gray-900">{connection.total_memories || 0}</span>
+                        <span className="text-gray-900 font-semibold">{connection.memories_count || 0}</span>
                     </div>
                 </div>
 
                 <div className="flex space-x-2">
                     <button 
                         onClick={() => handleSync(connection.id)}
-                        className="flex-1 px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                        disabled={isSync}
+                        className={`flex-1 px-3 py-2 rounded text-sm font-medium transition-all ${
+                            isSync 
+                                ? 'bg-blue-100 text-blue-600 cursor-not-allowed' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                        }`}
                     >
-                        Sync Now
+                        {isSync ? (
+                            <span className="flex items-center justify-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-600" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Syncing...
+                            </span>
+                        ) : (
+                            '🔄 Sync Now'
+                        )}
                     </button>
                     <button 
                         onClick={() => handleConfigure(connection)}
-                        className="px-3 py-2 bg-gray-200 text-gray-700 rounded text-sm hover:bg-gray-300"
+                        className="px-3 py-2 bg-gray-100 text-gray-700 rounded text-sm hover:bg-gray-200 transition-colors"
                     >
-                        Configure
+                        ⚙️ Configure
                     </button>
                     <button 
                         onClick={() => handleDisconnect(connection.id)}
-                        className="px-3 py-2 bg-red-100 text-red-700 rounded text-sm hover:bg-red-200"
+                        className="px-3 py-2 bg-red-50 text-red-700 rounded text-sm hover:bg-red-100 transition-colors"
                     >
-                        Disconnect
+                        🗑️ Remove
                     </button>
                 </div>
             </div>
@@ -222,14 +272,14 @@ export default function Settings({ auth, apiConnections = [] }) {
     };
 
     const AddConnectionCard = ({ provider, description, icon }) => (
-        <div className="bg-white rounded-lg shadow p-6 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-colors">
+        <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-dashed border-gray-300 hover:border-blue-400 transition-all hover:shadow-xl">
             <div className="text-center">
                 <span className="text-4xl mb-3 block">{icon}</span>
                 <h3 className="font-semibold text-gray-900 mb-2">{provider}</h3>
                 <p className="text-sm text-gray-600 mb-4">{description}</p>
                 <button 
                     onClick={() => handleConnect(provider)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg"
                 >
                     Connect
                 </button>
@@ -240,25 +290,29 @@ export default function Settings({ auth, apiConnections = [] }) {
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Settings</h2>}
+            header={
+                <div className="flex justify-between items-center">
+                    <h2 className="font-semibold text-xl text-gray-800 leading-tight">⚙️ Settings</h2>
+                </div>
+            }
         >
             <Head title="Settings" />
 
-            <div className="py-6">
+            <div className="py-8 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-lg shadow mb-6">
+                    <div className="bg-white rounded-xl shadow-lg mb-6">
                         <div className="border-b border-gray-200">
                             <nav className="-mb-px flex space-x-8 px-6">
                                 {[
-                                    { id: 'connections', name: 'API Connections' },
-                                    { id: 'privacy', name: 'Privacy & Data' },
-                                    { id: 'palace', name: 'Palace Settings' },
-                                    { id: 'notifications', name: 'Notifications' }
+                                    { id: 'connections', name: '🔗 API Connections' },
+                                    { id: 'privacy', name: '🔒 Privacy & Data' },
+                                    { id: 'palace', name: '🏰 Palace Settings' },
+                                    { id: 'notifications', name: '🔔 Notifications' }
                                 ].map((tab) => (
                                     <button
                                         key={tab.id}
                                         onClick={() => setActiveTab(tab.id)}
-                                        className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                                        className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                                             activeTab === tab.id
                                                 ? 'border-blue-500 text-blue-600'
                                                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -303,8 +357,8 @@ export default function Settings({ auth, apiConnections = [] }) {
                         )}
 
                         {activeTab === 'privacy' && (
-                            <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Data Privacy Controls</h3>
+                            <div className="bg-white rounded-xl shadow-lg p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">🔒 Data Privacy Controls</h3>
                                 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
@@ -336,10 +390,10 @@ export default function Settings({ auth, apiConnections = [] }) {
                                     <h4 className="font-medium text-gray-900 mb-3">Data Export & Deletion</h4>
                                     <div className="flex space-x-3">
                                         <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                                            Export My Data
+                                            📥 Export My Data
                                         </button>
                                         <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-                                            Delete All Data
+                                            🗑️ Delete All Data
                                         </button>
                                     </div>
                                 </div>
@@ -347,8 +401,8 @@ export default function Settings({ auth, apiConnections = [] }) {
                         )}
 
                         {activeTab === 'palace' && (
-                            <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">3D Palace Settings</h3>
+                            <div className="bg-white rounded-xl shadow-lg p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">🏰 3D Palace Settings</h3>
                                 
                                 <div className="space-y-4">
                                     <div>
@@ -374,8 +428,8 @@ export default function Settings({ auth, apiConnections = [] }) {
                         )}
 
                         {activeTab === 'notifications' && (
-                            <div className="bg-white rounded-lg shadow p-6">
-                                <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
+                            <div className="bg-white rounded-xl shadow-lg p-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-4">🔔 Notification Preferences</h3>
                                 
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
@@ -427,10 +481,10 @@ export default function Settings({ auth, apiConnections = [] }) {
                             
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Email/Username
+                                    {selectedProvider === 'Spotify' ? 'Spotify Username/Email' : 'Email'}
                                 </label>
                                 <input
-                                    type="email"
+                                    type="text"
                                     value={connectionForm.email || ''}
                                     onChange={(e) => setConnectionForm({...connectionForm, email: e.target.value})}
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -438,119 +492,26 @@ export default function Settings({ auth, apiConnections = [] }) {
                                 />
                             </div>
                             
-                            {/* Google Services Fields */}
-                            {['Gmail', 'Google Calendar', 'Google Photos'].includes(selectedProvider) && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Client ID
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={connectionForm.client_id || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, client_id: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Your Google OAuth Client ID"
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Client Secret
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={connectionForm.client_secret || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, client_secret: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Your Google OAuth Client Secret"
-                                            required
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            
-                            {/* Spotify Fields */}
-                            {selectedProvider === 'Spotify' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Client ID
-                                        </label>
-                                        <input
-                                            type="text"
-                                            value={connectionForm.client_id || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, client_id: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Your Spotify App Client ID"
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Client Secret
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={connectionForm.client_secret || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, client_secret: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Your Spotify App Client Secret"
-                                            required
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            
-                            {/* Location Services Fields */}
-                            {selectedProvider === 'Location Services' && (
-                                <>
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            API Key
-                                        </label>
-                                        <input
-                                            type="password"
-                                            value={connectionForm.api_key || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, api_key: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="Your Location API Key"
-                                            required
-                                        />
-                                    </div>
-                                    
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Webhook URL (Optional)
-                                        </label>
-                                        <input
-                                            type="url"
-                                            value={connectionForm.webhook_url || ''}
-                                            onChange={(e) => setConnectionForm({...connectionForm, webhook_url: e.target.value})}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                            placeholder="https://your-app.com/webhooks/location"
-                                        />
-                                    </div>
-                                </>
-                            )}
-                            
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Permissions (Scopes)
-                                </label>
-                                <div className="text-xs text-gray-500 mb-2">
-                                    {connectionForm.scopes?.join(', ')}
+                            {selectedProvider === 'Gmail' && (
+                                <div className="bg-red-50 p-3 rounded-md text-sm text-red-800">
+                                    📧 <strong>Gmail Integration:</strong> Import emails as 3D memory objects. Requires Gmail API access with automatic token refresh.
                                 </div>
-                                <textarea
-                                    value={connectionForm.scopes?.join('\n') || ''}
-                                    onChange={(e) => setConnectionForm({...connectionForm, scopes: e.target.value.split('\n').filter(s => s.trim())})}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    rows="3"
-                                    placeholder="One scope per line"
-                                />
-                            </div>
+                            )}
+                            {selectedProvider === 'Google Calendar' && (
+                                <div className="bg-green-50 p-3 rounded-md text-sm text-green-800">
+                                    📅 <strong>Calendar Integration:</strong> Import events and meetings. Requires Calendar API access with automatic token refresh.
+                                </div>
+                            )}
+                            {selectedProvider === 'Spotify' && (
+                                <div className="bg-green-50 p-3 rounded-md text-sm text-green-800">
+                                    🎵 <strong>Spotify Integration:</strong> Import listening history. Requires Spotify Premium for full access.
+                                </div>
+                            )}
+                            {!['Gmail', 'Google Calendar', 'Spotify'].includes(selectedProvider) && (
+                                <div className="bg-blue-50 p-3 rounded-md text-sm text-blue-800">
+                                    🔗 You'll be redirected to {selectedProvider} to authorize access after clicking Connect.
+                                </div>
+                            )}
                             
                             <div className="flex space-x-3 pt-4">
                                 <button
@@ -564,12 +525,21 @@ export default function Settings({ auth, apiConnections = [] }) {
                                     type="submit"
                                     className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                                 >
-                                    Connect
+                                    Connect & Authorize
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
+            )}
+
+            {/* Toast Notifications */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    onClose={() => setToast(null)}
+                />
             )}
         </AuthenticatedLayout>
     );

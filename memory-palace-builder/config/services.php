@@ -35,38 +35,16 @@ return [
         ],
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Memory Palace API Services
-    |--------------------------------------------------------------------------
-    */
-
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('GOOGLE_REDIRECT_URI'),
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('APP_URL') . '/auth/google/callback'),
     ],
 
     'spotify' => [
         'client_id' => env('SPOTIFY_CLIENT_ID'),
         'client_secret' => env('SPOTIFY_CLIENT_SECRET'),
-        'redirect' => env('SPOTIFY_REDIRECT_URI'),
-    ],
-
-    'location' => [
-        'api_key' => env('LOCATION_API_KEY'),
-    ],
-
-    'mcp' => [
-        'host' => env('MCP_SERVER_HOST', '127.0.0.1'),
-        'port' => env('MCP_SERVER_PORT', 3000),
-        'name' => env('MCP_SERVER_NAME', 'memory-palace-server'),
-    ],
-
-    'postman' => [
-        'api_key' => env('POSTMAN_API_KEY'),
-        'workspace_id' => env('POSTMAN_WORKSPACE_ID'),
-        'collection_id' => env('POSTMAN_COLLECTION_ID'),
+        'redirect' => env('SPOTIFY_REDIRECT_URI', env('APP_URL') . '/auth/spotify/callback'),
     ],
 
 ];

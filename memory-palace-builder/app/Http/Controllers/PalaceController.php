@@ -70,8 +70,9 @@ class PalaceController extends Controller
                     'type' => $memory->type,
                     'title' => $memory->title,
                     'description' => $memory->description,
-                    'content' => substr($memory->content ?? '', 0, 200) . (strlen($memory->content ?? '') > 200 ? '...' : ''),
+                    'content' => $memory->content, // Full content for modal
                     'memory_date' => $memory->memory_date->toISOString(),
+                    'created_at' => $memory->created_at->toISOString(),
                     'sentiment' => $memory->sentiment,
                     'sentiment_score' => $memory->sentiment_score,
                     'tags' => $memory->tags ?? [],
@@ -209,6 +210,22 @@ class PalaceController extends Controller
                 'label' => date('g A', mktime($pattern->hour, 0, 0)),
             ];
         });
+    }
+
+    /**
+     * Show individual memory
+     */
+    public function showMemory(Memory $memory)
+    {
+        if ($memory->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $memory->load(['palaceRoom']);
+        
+        return Inertia::render('Memories/Show', [
+            'memory' => $memory
+        ]);
     }
 
     /**

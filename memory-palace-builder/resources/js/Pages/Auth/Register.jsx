@@ -20,6 +20,11 @@ export default function Register() {
         <GuestLayout>
             <Head title="Register" />
 
+            <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold text-white mb-2">🚀 Build Your Palace</h2>
+                <p className="text-white/70">Create your account and start your memory journey</p>
+            </div>
+
             <form onSubmit={submit} className="space-y-5">
                 <PalaceInput
                     label="Name"
@@ -84,18 +89,20 @@ export default function Register() {
                     }
                 />
 
-                <div className="flex items-center justify-between">
-                    <Link href={route('login')} className="palace-link text-sm">
-                        Already registered?
-                    </Link>
+                <PalaceButton 
+                    type="submit" 
+                    className="w-full text-lg py-4"
+                    disabled={processing}
+                    loading={processing}
+                >
+                    🏰 Create My Palace
+                </PalaceButton>
 
-                    <PalaceButton 
-                        type="submit" 
-                        disabled={processing}
-                        loading={processing}
-                    >
-                        Create account
-                    </PalaceButton>
+                <div className="text-center pt-4 border-t border-white/10">
+                    <span className="text-white/70 text-sm">Already have an account?</span>
+                    <Link href={route('login')} className="ml-2 palace-link text-sm font-semibold">
+                        🔑 Sign in to your palace
+                    </Link>
                 </div>
             </form>
         </GuestLayout>

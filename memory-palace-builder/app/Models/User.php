@@ -45,4 +45,19 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function apiConnections()
+    {
+        return $this->hasMany(ApiConnection::class);
+    }
+
+    public function memories()
+    {
+        return $this->hasMany(Memory::class);
+    }
+
+    public function palaceRooms()
+    {
+        return $this->hasMany(PalaceRoom::class);
+    }
 }

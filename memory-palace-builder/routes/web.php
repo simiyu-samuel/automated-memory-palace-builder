@@ -45,6 +45,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Palace main interface
     Route::get('/palace', [PalaceController::class, 'index'])->name('palace.index');
     
+    // Individual memory view
+    Route::get('/memories/{memory}', [PalaceController::class, 'showMemory'])->name('memories.show');
+    
     // Memory search
     Route::get('/palace/search', [PalaceController::class, 'search'])->name('palace.search');
     
@@ -73,7 +76,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Settings with API connections data
     Route::get('/settings', function () {
         $user = auth()->user();
-        $apiConnections = \App\Models\ApiConnection::where('user_id', $user->id)->get();
+        $apiConnections = \App\Models\ApiConnection::where('user_id', $user->id)
+            ->get()
+            ->map(function ($connection) use ($user) {
+                // Count memories directly by api_connection_id
+                $memoriesCount = \App\Models\Memory::where('user_id', $user->id)
+                    ->where('api_connection_id', $connection->id)
+                    ->count();
+                
+                $connection->memories_count = $memoriesCount;
+                return $connection;
+            });
         
         return inertia('Settings/Index', [
             'apiConnections' => $apiConnections
@@ -84,70 +97,85 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // API OAuth routes (for API connections)
 Route::middleware(['auth', 'verified'])->group(function () {
     // OAuth initiation routes
-    Route::get('/auth/google', function (\Illuminate\Http\Request $request) {
-        $service = $request->get('service', 'gmail');
-        $user = auth()->user();
+    // Google OAuth callback
+    Route::get('/auth/google/callback', function (\Illuminate\Http\Request $request) {
+        $code = $request->get('code');
+        $state = $request->get('state');
         
-        // Create or update API connection
-        // Validate Google OAuth is configured
-        if (!config('services.google.client_id') || config('services.google.client_id') === 'your_google_client_id_here') {
-            return redirect()->route('settings.index')->with('error', 'Google OAuth not configured. Please add your Client ID and Secret to .env file.');
+        if ($code && $state) {
+            try {
+                $stateData = json_decode(base64_decode($state), true);
+                $connection = \App\Models\ApiConnection::find($stateData['connection_id']);
+                
+                if ($connection) {
+                    $googleService = new \App\Services\GoogleOAuthService();
+                    $tokens = $googleService->exchangeCodeForTokens($code);
+                    
+                    // Update connection with new tokens and scopes
+                    $connection->update([
+                        'access_token' => $tokens['access_token'],
+                        'refresh_token' => $tokens['refresh_token'] ?? null,
+                        'token_expires_at' => isset($tokens['expires_in']) ? now()->addSeconds($tokens['expires_in']) : null,
+                        'is_active' => true,
+                        'last_sync_at' => now(),
+                        'scopes' => $tokens['scope'] ? explode(' ', $tokens['scope']) : $connection->scopes
+                    ]);
+                    
+                    return redirect()->route('settings.index')->with('success', ucfirst($stateData['provider']) . ' connected and authorized successfully!');
+                }
+            } catch (\Exception $e) {
+                \Log::error('Google OAuth error: ' . $e->getMessage());
+                return redirect()->route('settings.index')->with('error', 'OAuth authorization failed: ' . $e->getMessage());
+            }
         }
         
-        $connection = \App\Models\ApiConnection::updateOrCreate(
-            ['user_id' => $user->id, 'provider' => $service],
-            [
-                'provider_id' => 'google_' . $service . '_' . $user->id,
-                'email' => $user->email,
-                'scopes' => ['https://www.googleapis.com/auth/gmail.readonly'],
-                'metadata' => [
-                    'account_name' => ucfirst($service) . ' Account',
-                    'client_id' => config('services.google.client_id'),
-                    'redirect_uri' => config('services.google.redirect')
-                ],
-                'is_active' => true,
-                'last_sync_at' => now()
-            ]
-        );
-        
-        return redirect()->route('settings.index')->with('success', ucfirst($service) . ' connected successfully!');
-    })->name('auth.google');
+        return redirect()->route('settings.index')->with('error', 'OAuth authorization failed. Please try again.');
+    })->name('auth.google.callback');
     
-    Route::get('/auth/spotify', function () {
-        $user = auth()->user();
+    // Spotify OAuth callback
+    Route::get('/auth/spotify/callback', function (\Illuminate\Http\Request $request) {
+        $code = $request->get('code');
+        $state = $request->get('state');
         
-        // Validate Spotify OAuth is configured
-        if (!config('services.spotify.client_id') || config('services.spotify.client_id') === 'your_spotify_client_id_here') {
-            return redirect()->route('settings.index')->with('error', 'Spotify OAuth not configured. Please add your Client ID and Secret to .env file.');
+        if ($code && $state) {
+            try {
+                $stateData = json_decode(base64_decode($state), true);
+                $connection = \App\Models\ApiConnection::find($stateData['connection_id']);
+                
+                if ($connection) {
+                    $spotifyService = new \App\Services\SpotifyService();
+                    $tokens = $spotifyService->exchangeCodeForTokens($code);
+                    
+                    $connection->update([
+                        'access_token' => $tokens['access_token'],
+                        'refresh_token' => $tokens['refresh_token'] ?? null,
+                        'token_expires_at' => isset($tokens['expires_in']) ? now()->addSeconds($tokens['expires_in']) : null,
+                        'is_active' => true,
+                        'last_sync_at' => now()
+                    ]);
+                    
+                    return redirect()->route('settings.index')->with('success', 'Spotify connected and authorized successfully!');
+                }
+            } catch (\Exception $e) {
+                \Log::error('Spotify OAuth error: ' . $e->getMessage());
+                return redirect()->route('settings.index')->with('error', 'OAuth authorization failed: ' . $e->getMessage());
+            }
         }
         
-        \App\Models\ApiConnection::updateOrCreate(
-            ['user_id' => $user->id, 'provider' => 'spotify'],
-            [
-                'provider_id' => 'spotify_' . $user->id,
-                'email' => $user->email,
-                'scopes' => ['user-read-recently-played'],
-                'metadata' => [
-                    'account_name' => 'Spotify Account',
-                    'client_id' => config('services.spotify.client_id'),
-                    'redirect_uri' => config('services.spotify.redirect')
-                ],
-                'is_active' => true,
-                'last_sync_at' => now()
-            ]
-        );
-        
-        return redirect()->route('settings.index')->with('success', 'Spotify connected successfully!');
-    })->name('auth.spotify');
+        return redirect()->route('settings.index')->with('error', 'OAuth authorization failed. Please try again.');
+    })->name('auth.spotify.callback');
     
     Route::get('/auth/location', function () {
         $user = auth()->user();
         
-        \App\Models\ApiConnection::updateOrCreate(
+        $connection = \App\Models\ApiConnection::updateOrCreate(
             ['user_id' => $user->id, 'provider' => 'location_services'],
             [
                 'provider_id' => 'location_' . $user->id,
                 'email' => $user->email,
+                'access_token' => 'location_token_' . time(),
+                'refresh_token' => null,
+                'token_expires_at' => null,
                 'scopes' => ['location-read'],
                 'metadata' => ['account_name' => 'Location Services'],
                 'is_active' => true,
@@ -155,8 +183,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ]
         );
         
-        return redirect()->route('settings.index')->with('success', 'Location services connected successfully!');
+        return redirect()->route('settings.index')->with('success', 'Location services connected and activated successfully!');
     })->name('auth.location');
 });
 
 require __DIR__.'/auth.php';
+require __DIR__.'/test-spotify.php';
+require __DIR__.'/debug.php';
+require __DIR__.'/debug-simple.php';
+require __DIR__.'/test-connection.php';
+require __DIR__.'/test-redirect.php';
+require __DIR__.'/oauth-redirect.php';

@@ -38,9 +38,9 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                                 <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                                     {memory.type}
                                 </span>
-                                {memory.metadata?.date && (
+                                {(memory.memory_date || memory.created_at) && (
                                     <span className="text-sm text-gray-500">
-                                        {formatDate(memory.metadata.date)}
+                                        {formatDate(memory.memory_date || memory.created_at)}
                                     </span>
                                 )}
                             </div>
@@ -62,12 +62,30 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                             </div>
                         )}
 
+                        {/* Full Content */}
+                        {memory.content && (
+                            <div>
+                                <h3 className="font-semibold text-gray-900 mb-2">
+                                    {memory.type === 'email' ? 'Email Content' : 'Content'}
+                                </h3>
+                                <div className="bg-gray-50 p-4 rounded-lg max-h-64 overflow-y-auto">
+                                    <div className="text-gray-700 text-sm leading-relaxed">
+                                        {memory.content.split('\n').map((line, index) => (
+                                            <p key={index} className="mb-2 last:mb-0">
+                                                {line.trim() || '\u00A0'}
+                                            </p>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Tags */}
-                        {memory.metadata?.tags && memory.metadata.tags.length > 0 && (
+                        {memory.tags && memory.tags.length > 0 && (
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-2">Tags</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {memory.metadata.tags.map((tag, index) => (
+                                    {memory.tags.map((tag, index) => (
                                         <span
                                             key={index}
                                             className="px-2 py-1 bg-gray-200 text-gray-700 rounded text-sm"
@@ -80,11 +98,11 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                         )}
 
                         {/* People */}
-                        {memory.metadata?.people && memory.metadata.people.length > 0 && (
+                        {memory.people && memory.people.length > 0 && (
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-2">People</h3>
                                 <div className="flex flex-wrap gap-2">
-                                    {memory.metadata.people.map((person, index) => (
+                                    {memory.people.map((person, index) => (
                                         <span
                                             key={index}
                                             className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-sm"
@@ -97,10 +115,10 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                         )}
 
                         {/* Location */}
-                        {memory.metadata?.location && (
+                        {memory.location && (
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-2">Location</h3>
-                                <p className="text-gray-700">{memory.metadata.location}</p>
+                                <p className="text-gray-700">{memory.location}</p>
                             </div>
                         )}
 
@@ -112,23 +130,33 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                                     {memory.objects.map((obj, index) => (
                                         <div key={index} className="border rounded-lg p-3">
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="font-medium text-sm">{obj.type}</span>
+                                                <span className="font-medium text-sm">{obj.type || 'Memory Object'}</span>
                                                 <div 
                                                     className="w-4 h-4 rounded"
-                                                    style={{ backgroundColor: obj.color }}
+                                                    style={{ backgroundColor: obj.color || '#6b7280' }}
                                                 ></div>
                                             </div>
-                                            <div className="text-xs text-gray-500">
-                                                Position: ({obj.position.x.toFixed(1)}, {obj.position.y.toFixed(1)}, {obj.position.z.toFixed(1)})
-                                            </div>
+                                            {obj.position && (
+                                                <div className="text-xs text-gray-500">
+                                                    Position: ({obj.position.x?.toFixed(1) || 0}, {obj.position.y?.toFixed(1) || 0}, {obj.position.z?.toFixed(1) || 0})
+                                                </div>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
+                        {/* Memory Date */}
+                        {memory.memory_date && (
+                            <div>
+                                <h3 className="font-semibold text-gray-900 mb-2">Memory Date</h3>
+                                <p className="text-gray-700">{formatDate(memory.memory_date)}</p>
+                            </div>
+                        )}
+
                         {/* Sentiment Score */}
-                        {memory.sentiment_score !== undefined && (
+                        {(memory.sentiment_score !== undefined && memory.sentiment_score !== null) && (
                             <div>
                                 <h3 className="font-semibold text-gray-900 mb-2">Sentiment Analysis</h3>
                                 <div className="flex items-center space-x-3">
@@ -139,12 +167,12 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                                                 memory.sentiment_score < 0 ? 'bg-red-500' : 'bg-gray-400'
                                             }`}
                                             style={{ 
-                                                width: `${Math.abs(memory.sentiment_score) * 100}%` 
+                                                width: `${Math.abs(typeof memory.sentiment_score === 'number' ? memory.sentiment_score : 0) * 100}%` 
                                             }}
                                         ></div>
                                     </div>
                                     <span className="text-sm text-gray-600">
-                                        {memory.sentiment_score.toFixed(2)}
+                                        {typeof memory.sentiment_score === 'number' ? memory.sentiment_score.toFixed(2) : '0.00'}
                                     </span>
                                 </div>
                             </div>
@@ -159,7 +187,16 @@ const MemoryModal = ({ memory, isOpen, onClose }) => {
                         >
                             Close
                         </button>
-                        <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        <button 
+                            onClick={() => {
+                                if (memory.id || memory.memory_id) {
+                                    window.open(`/memories/${memory.id || memory.memory_id}`, '_blank');
+                                } else {
+                                    alert('Memory ID not available');
+                                }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
                             View Full Memory
                         </button>
                     </div>
