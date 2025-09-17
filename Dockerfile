@@ -22,6 +22,13 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 COPY --from=assets /app/public/build ./public/build
 
+RUN php artisan key:generate
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+RUN php artisan migrate:fresh --seed --force
+
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
