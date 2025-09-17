@@ -28,10 +28,9 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-COPY memory-palace-builder/composer.json memory-palace-builder/composer.lock ./
-RUN composer install --no-interaction --optimize-autoloader --no-dev
-
 COPY memory-palace-builder/ .
+
+RUN composer install --no-interaction --optimize-autoloader --no-dev
 
 COPY --from=assets /app/public/build ./public/build
 
