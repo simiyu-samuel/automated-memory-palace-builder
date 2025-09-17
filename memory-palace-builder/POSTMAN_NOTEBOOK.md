@@ -22,10 +22,15 @@ As someone who receives hundreds of emails, takes countless photos, and attends 
 
 ### API Endpoints Used
 ```
-POST /api/v1/collect-memories
-GET /api/v1/memories
-POST /api/v1/memory-objects
-POST /api/v1/connections
+POST /api/sync-all
+POST /api/search-mcp
+POST /api/connections/{id}/sync
+POST /api/simple-sync/{connectionId}
+GET  /api/palace-rooms
+POST /api/connections
+GET  /api/memory-objects
+POST /api/memories/search
+GET  /api/palace/updates
 ```
 
 ## 🚀 How to Run
@@ -56,20 +61,21 @@ npm run mcp-server
 
 ### 2. API Connections
 - Connect Gmail, Google Calendar, Spotify, Location Services
-- Service-specific configuration forms
-- Real-time sync capabilities
-- Secure credential storage
+- Service-specific configuration forms with OAuth flow
+- Real-time sync capabilities via MCP server
+- Secure credential storage with token refresh
 
 ### 3. Memory Search
-- Full-text search across all memories
-- Filter by type, sentiment, room, date
+- Full-text search across all memories via `/api/memories/search`
+- Filter by type, sentiment, room, date, tags
+- AI-powered relevance scoring through MCP
 - Real-time results with proper pagination
 
 ### 4. Dashboard Analytics
-- Memory count statistics
+- Memory count statistics via `/api/memories/stats`
 - Sentiment analysis breakdown
-- Recent activity tracking
-- Quick navigation to different sections
+- Processing logs monitoring at `/api/processing-logs`
+- User insights through `/api/insights`
 
 ## 🔗 Postman Collection
 
@@ -82,38 +88,58 @@ npm run mcp-server
   },
   "item": [
     {
-      "name": "Collect Gmail Memories",
+      "name": "MCP Sync All Connections",
       "request": {
         "method": "POST",
-        "url": "{{base_url}}/api/v1/collect-memories",
+        "url": "{{base_url}}/api/sync-all",
         "body": {
-          "provider": "gmail",
-          "user_id": 2
+          "provider": "gmail"
         }
       }
     },
     {
-      "name": "Search Memories",
+      "name": "MCP Search Memories",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/api/search-mcp",
+        "body": {
+          "query": "project",
+          "type": "email",
+          "sentiment": "positive"
+        }
+      }
+    },
+    {
+      "name": "Get Palace Rooms",
       "request": {
         "method": "GET",
-        "url": "{{base_url}}/api/v1/memories",
+        "url": "{{base_url}}/api/palace-rooms",
         "params": [
-          {"key": "search", "value": "project"},
-          {"key": "type", "value": "email"},
-          {"key": "sentiment", "value": "positive"}
+          {"key": "user_id", "value": "2"}
         ]
       }
     },
     {
-      "name": "Create 3D Memory Object",
+      "name": "Create Memory Object",
       "request": {
         "method": "POST",
-        "url": "{{base_url}}/api/v1/memory-objects",
+        "url": "{{base_url}}/api/memory-objects",
         "body": {
           "memory_id": 1,
+          "palace_room_id": 1,
           "position": {"x": 2, "y": 1.5, "z": -1},
           "object_type": "email"
         }
+      }
+    },
+    {
+      "name": "Real-time Palace Updates",
+      "request": {
+        "method": "GET", 
+        "url": "{{base_url}}/api/palace/updates",
+        "params": [
+          {"key": "since", "value": "2024-12-15T10:00:00Z"}
+        ]
       }
     }
   ]
@@ -166,67 +192,78 @@ const color = memory.sentiment === 'positive' ? '#10b981' :
 ```
 
 ### **Zero Manual Configuration Required**
-1. **Connect API** → System automatically imports memories
-2. **AI Analysis** → Sentiment, categorization, room assignment
-3. **3D Generation** → Objects, positions, colors, animations
-4. **Ready to Explore** → No manual palace building needed
+1. **Connect API** → OAuth flow creates secure connection
+2. **MCP Processing** → AI analysis via `/api/sync-all`
+3. **3D Generation** → Objects created at `/api/memory-objects`
+4. **Real-time Updates** → Live sync via `/api/palace/updates`
 
 ### **Real-Time Automation**
-- New memories automatically appear in 3D space
-- AI continuously optimizes object placement
+- New memories automatically appear through MCP server processing
+- AI continuously optimizes object placement via Laravel jobs
 - Dynamic room themes based on content analysis
-- Automatic relationship mapping between memories
+- Automatic relationship mapping through `/api/memories/{id}/related`
 
 ## 🏆 Technical Achievements
 
 ### 🤖 **Automated 3D Pipeline** - *Revolutionary Approach*
 ```
-API Data → AI Analysis → 3D Generation → Palace Rendering
+API Data → MCP Server → Laravel Processing → 3D Palace
     │           │              │              │
-  Gmail      Sentiment      Geometry      Three.js
-  Photos     Categories     Positioning   Animation
-  Events     Room Logic     Materials     Interaction
+  Gmail      AI Analysis    Database      Three.js
+  Calendar   Sentiment      Queue Jobs    Rendering
+  Photos     Categories     Real-time     Interaction
 ```
 
 ### **Smart Memory Processing**
-- **Automatic sentiment analysis** using AI
-- **Content-based room assignment** algorithm
-- **Dynamic 3D object selection** by memory type
-- **Intelligent spatial distribution** to prevent overlaps
-- **Real-time palace updates** as new memories arrive
+- **MCP server integration** with 3 specialized tools
+- **Laravel queue jobs** for background processing
+- **Real-time sync** via `/api/connections/{id}/sync`
+- **OAuth token management** with automatic refresh
+- **Session-based authentication** with CSRF protection
 
-### MCP Integration
-- Custom MCP server with 3 specialized tools
-- `create_memory_object` - Automated 3D object generation
-- Real-time memory processing capabilities
+### **Advanced Search & Analytics**
+- **Full-text search** with PostgreSQL indexing
+- **Multi-dimensional filtering** by sentiment, type, room, tags
+- **AI-powered relevance** scoring through MCP
+- **Real-time palace updates** for live synchronization
+- **Processing logs** for debugging and monitoring
 
 ### 3D Visualization Engine
 - **Procedural geometry generation** based on memory data
 - **Automatic material assignment** using sentiment colors
 - **Dynamic positioning algorithms** for optimal layout
-- Particle effects and floating animations
-- Orbital camera controls with zoom
+- **Palace room management** with theme-based organization
+- **Interactive memory objects** with hover and click events
 
 ### API Architecture
-- RESTful Laravel backend with automated processing
-- PostgreSQL with AI-optimized memory storage
-- Real-time 3D synchronization pipeline
+- **RESTful Laravel backend** with Inertia.js frontend
+- **PostgreSQL database** with AI-optimized memory storage
+- **MCP server integration** for intelligent processing
+- **OAuth integration** for Gmail, Calendar, Spotify
+- **Background job processing** for scalable memory collection
 
-## 📊 Demo Data
-The system comes pre-seeded with realistic demo data:
+## 📊 Demo Data & Authentication
+The system comes pre-seeded with:
+- **Demo user**: simiyusamuel869@gmail.com / password
 - 6 sample memories across different types
-- 3 themed palace rooms
-- 1 active Gmail API connection
-- Sentiment analysis results
+- 3 themed palace rooms with AI-generated layouts
+- 1 active Gmail API connection with OAuth tokens
+- Processing logs and user insights
+
+### Authentication Flow
+1. **Web login** at http://127.0.0.1:8000/login
+2. **Session-based auth** with Laravel Breeze
+3. **CSRF protection** for all POST/PUT/DELETE requests
+4. **OAuth callbacks** for API connections at `/auth/{provider}/callback`
 
 ## 🎯 Personal Impact & Competitive Advantage
 
 ### **Solves Real Memory Overload Problem**
 Instead of losing important emails in my inbox or forgetting meaningful photos, I can now:
 - **Spatially navigate** through my digital life
-- **Visually connect** related memories  
-- **Quickly find** specific information
-- **Enjoy exploring** my personal data
+- **AI-powered search** finds memories instantly
+- **Visual connections** between related content
+- **Real-time updates** keep palace current
 
 ### **🚀 What Makes This Different from Other Memory Palace Apps:**
 
@@ -238,35 +275,43 @@ Instead of losing important emails in my inbox or forgetting meaningful photos, 
 - ❌ Time-intensive setup process
 
 #### **Our Automated Memory Palace:**
-- ✅ **Zero setup** - Connect API and palace builds itself
-- ✅ **AI-powered** - Smart categorization and placement
-- ✅ **Real data integration** - Actual emails, photos, events
-- ✅ **Dynamic updates** - Palace evolves with your life
-- ✅ **Instant gratification** - Working palace in seconds
+- ✅ **Zero setup** - OAuth connects and MCP processes automatically
+- ✅ **AI-powered** - Smart categorization via `/api/search-mcp`
+- ✅ **Real data integration** - Actual Gmail, Calendar, Photos
+- ✅ **Live updates** - Real-time sync via `/api/palace/updates`
+- ✅ **Production ready** - Laravel backend with proper authentication
 
-**This isn't just a memory palace - it's an AI-powered digital life visualizer that builds itself!**
+**This isn't just a memory palace - it's an AI-powered digital life visualizer with production-grade architecture!**
 
 ## 🔮 Future Enhancements
 
-### **Advanced AI Automation**
-- **Predictive object placement** using machine learning
-- **Automatic memory clustering** by relationships
-- **Smart room expansion** as memory collection grows
-- **AI-suggested memory connections** across platforms
+### **Advanced MCP Integration**
+- **Predictive memory importance** using machine learning
+- **Cross-platform relationship mapping** between services
+- **Automatic memory clustering** by AI-detected themes
+- **Smart notification system** for important memories
 
 ### **Enhanced Visualization**
-- **VR/AR support** for immersive exploration
+- **WebXR support** for immersive VR/AR exploration
 - **Procedural room generation** based on memory themes
-- **Dynamic lighting** that reflects memory sentiment
+- **Dynamic lighting systems** reflecting memory sentiment
 - **Collaborative palace sharing** with family/friends
 
-### **Intelligence Features**
-- **Memory importance scoring** for automatic highlighting
-- **Temporal relationship mapping** between memories
-- **Advanced analytics** and life pattern insights
-- **Voice-activated palace navigation**
+### **Production Features**
+- **Multi-user support** with role-based access
+- **API rate limiting** and quota management
+- **Advanced caching** with Redis integration
+- **Monitoring dashboard** for system health
 
 ---
 
 **Built for the Postman Web Dev Challenge Hackathon**  
-*Making personal memory management spatial, visual, and delightful* 🏰✨
+*Making personal memory management spatial, visual, and production-ready* 🏰✨
+
+## 🔧 Technical Stack
+- **Backend**: Laravel 11+ with Inertia.js
+- **Database**: PostgreSQL with full-text search
+- **Frontend**: React.js with Three.js for 3D rendering
+- **MCP Server**: Node.js with custom tools
+- **Authentication**: Laravel Breeze with OAuth
+- **Deployment**: PHP 8.3, Composer, NPM
