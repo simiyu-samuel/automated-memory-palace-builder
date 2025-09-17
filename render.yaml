@@ -1,28 +1,31 @@
 services:
   - type: web
-    name: memory-palace-builder 
-    env: php
-    plan: free 
+    name: memory-palace-app
+    plan: free
     region: oregon
-    rootDir: memory-palace-builder
-    buildCommand: |
-      composer install
-      npm install
-      npm run build
-      php artisan migrate --force # Runs migrations on every build
-    startCommand: vendor/bin/heroku-php-apache2 public/
+    
+    env: docker
+    
+    dockerfilePath: ./Dockerfile 
+
     envVars:
+      - key: APP_KEY 
+        sync: false 
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
       - key: APP_URL
-        value: https://automated-memory-palace-builder.onrender.com 
-      - key: APP_KEY
         fromService:
           type: web
-          name: memory-palace-builder
-          envVarKey: APP_KEY
+          name: memory-palace-app
+          property: url
+      - key: DB_CONNECTION 
+        value: pgsql
       - key: DATABASE_URL
         fromDatabase:
           name: memory-palace-db
-          property: internalConnectionString
+          property: connectionString 
 
 databases:
   - name: memory-palace-db
