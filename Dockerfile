@@ -22,6 +22,8 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 COPY --from=assets /app/public/build ./public/build
 
+RUN cp .env.example .env
+
 RUN php artisan key:generate
 RUN php artisan config:cache
 RUN php artisan route:cache
