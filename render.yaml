@@ -26,8 +26,8 @@ services:
           property: internalConnectionString
 
   # A PostgreSQL Database
-  - type: psql
-    name: memory-palace-db
-    plan: free
-    region: oregon
-    ipAllowList: [] # Allows all services in your account to connect
+  databases:
+    # PostgreSQL Database
+    - name: memory-palace-db
+      plan: free
+      region: oregon
