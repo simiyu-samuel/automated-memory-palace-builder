@@ -1,5 +1,4 @@
 services:
-  # A Web Service for your Laravel App
   - type: web
     name: memory-palace-builder 
     env: php
@@ -25,9 +24,7 @@ services:
           name: memory-palace-db
           property: internalConnectionString
 
-  # A PostgreSQL Database
-  databases:
-    # PostgreSQL Database
-    - name: memory-palace-db
-      plan: free
-      region: oregon
+databases:
+  - name: memory-palace-db
+    plan: free
+    region: oregon
