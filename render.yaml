@@ -3,40 +3,6 @@ services:
     name: memory-palace-app
     plan: free
     region: oregon
-    
-    env: docker
-    
-    dockerfilePath: ./Dockerfile 
-
-    envVars:
-      - key: APP_KEY 
-        sync: false 
-      - key: APP_ENV
-        value: production
-      - key: APP_DEBUG
-        value: false
-      - key: APP_URL
-        fromService:
-          type: web
-          name: memory-palace-app
-          property: url
-      - key: DB_CONNECTION 
-        value: pgsql
-      - key: DATABASE_URL
-        fromDatabase:
-          name: memory-palace-db
-          property: connectionString 
-
-databases:
-  - name: memory-palace-db
-    plan: free
-    region: oregon
-
-services:
-  - type: web
-    name: memory-palace-app
-    plan: free
-    region: oregon
 
     env: docker
  
