@@ -138,7 +138,7 @@ class MemoryPalaceMCPServer {
     
     try {
       // Get user's API connections directly from database
-      const connectionsResponse = await axios.get(`http://127.0.0.1:8000/api/v1/users/${user_id}/connections`, {
+      const connectionsResponse = await axios.get(`https://memory-palace-app.onrender.com/api/v1/users/${user_id}/connections`, {
         headers: { 
           'Accept': 'application/json'
         },
@@ -218,7 +218,7 @@ class MemoryPalaceMCPServer {
     if (tokenExpiry <= now) {
       // Token is expired, try to refresh
       try {
-        const tokenResponse = await axios.post(`http://localhost:8000/api/v1/connections/${connection.id}/refresh-token`);
+        const tokenResponse = await axios.post(`${process.env.VITE_APP_URL}/api/v1/connections/${connection.id}/refresh-token`);
         if (tokenResponse.data.access_token) {
           access_token = tokenResponse.data.access_token;
         }
@@ -282,7 +282,7 @@ class MemoryPalaceMCPServer {
     if (tokenExpiry <= now) {
       // Token is expired, try to refresh
       try {
-        const tokenResponse = await axios.post(`http://localhost:8000/api/v1/connections/${connection.id}/refresh-token`);
+        const tokenResponse = await axios.post(`${process.env.VITE_APP_URL}/api/v1/connections/${connection.id}/refresh-token`);
         if (tokenResponse.data.access_token) {
           access_token = tokenResponse.data.access_token;
         }
@@ -366,7 +366,7 @@ class MemoryPalaceMCPServer {
           const newTokens = refreshResponse.data;
           
           // Update connection with new token
-          await axios.put(`http://localhost:8000/api/v1/api-connections/${connection.id}`, {
+          await axios.put(`${process.env.VITE_APP_URL}/api/v1/api-connections/${connection.id}`, {
             access_token: newTokens.access_token,
             token_expires_at: new Date(Date.now() + newTokens.expires_in * 1000).toISOString()
           });
@@ -439,7 +439,7 @@ class MemoryPalaceMCPServer {
       const room = await this.ensurePalaceRoom(user_id, roomName, memory.type);
       
       // Create memory
-      const memoryResponse = await axios.post('http://localhost:8000/api/v1/memories', {
+      const memoryResponse = await axios.post(`${process.env.VITE_APP_URL}/api/v1/memories`, {
         ...memory,
         user_id,
         api_connection_id: connection.id,
@@ -454,7 +454,7 @@ class MemoryPalaceMCPServer {
       const createdMemory = memoryResponse.data;
       
       // Create 3D memory object
-      await axios.post('http://localhost:8000/api/v1/memory-objects', {
+      await axios.post(`${process.env.VITE_APP_URL}/api/v1/memory-objects`, {
         memory_id: createdMemory.id,
         palace_room_id: room.id,
         object_type: memory.type,
@@ -520,7 +520,7 @@ class MemoryPalaceMCPServer {
   async ensurePalaceRoom(user_id, roomName, memoryType) {
     try {
       // Try to get existing room
-      const existingResponse = await axios.get(`http://localhost:8000/api/v1/palace-rooms?user_id=${user_id}&name=${encodeURIComponent(roomName)}`);
+      const existingResponse = await axios.get(`${process.env.VITE_APP_URL}/api/v1/palace-rooms?user_id=${user_id}&name=${encodeURIComponent(roomName)}`);
       const existingRooms = existingResponse.data;
       
       if (existingRooms && existingRooms.length > 0) {
@@ -542,7 +542,7 @@ class MemoryPalaceMCPServer {
         is_active: true
       };
       
-      const response = await axios.post('http://localhost:8000/api/v1/palace-rooms', roomData, {
+      const response = await axios.post(`${process.env.VITE_APP_URL}/api/v1/palace-rooms`, roomData, {
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -554,7 +554,7 @@ class MemoryPalaceMCPServer {
       console.error('Failed to ensure palace room:', error.response?.data || error.message);
       // Fallback: try to find any existing room for this user
       try {
-        const fallbackResponse = await axios.get(`http://localhost:8000/api/v1/palace-rooms?user_id=${user_id}`);
+        const fallbackResponse = await axios.get(`${process.env.VITE_APP_URL}/api/v1/palace-rooms?user_id=${user_id}`);
         const rooms = fallbackResponse.data;
         if (rooms && rooms.length > 0) {
           return rooms[0];
@@ -630,7 +630,7 @@ class MemoryPalaceMCPServer {
     const { query, type, sentiment } = args;
     
     try {
-      const response = await axios.post('http://localhost:8000/api/v1/memories/search', {
+      const response = await axios.post(`${process.env.VITE_APP_URL}/api/v1/memories/search`, {
         q: query,
         type,
         sentiment
@@ -679,7 +679,7 @@ class MemoryPalaceMCPServer {
     
     try {
       // Get memory details first
-      const memoryResponse = await axios.get(`http://localhost:8000/api/v1/memories/${memory_id}`, {
+      const memoryResponse = await axios.get(`${process.env.VITE_APP_URL}/api/v1/memories/${memory_id}`, {
         headers: {
           'Accept': 'application/json'
         }
@@ -688,7 +688,7 @@ class MemoryPalaceMCPServer {
       const memory = memoryResponse.data;
       
       // Create the 3D object
-      const response = await axios.post('http://localhost:8000/api/v1/memory-objects', {
+      const response = await axios.post(`${process.env.VITE_APP_URL}/api/v1/memory-objects`, {
         memory_id,
         palace_room_id: memory.palace_room_id,
         object_type,

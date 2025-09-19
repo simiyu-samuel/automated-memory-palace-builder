@@ -28,7 +28,7 @@ RUN php artisan key:generate
 RUN php artisan config:cache
 RUN php artisan view:cache
 
-RUN php artisan migrate:fresh --seed --force
+RUN --mount=type=secret,id=DATABASE_URL php artisan migrate:fresh --seed --force
 
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
