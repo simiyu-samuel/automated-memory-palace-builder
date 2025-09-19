@@ -25,7 +25,6 @@ COPY --from=assets /app/public/build ./public/build
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
 RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
 EXPOSE 80

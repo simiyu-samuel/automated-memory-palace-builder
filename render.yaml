@@ -4,17 +4,15 @@ services:
     plan: free
     region: oregon
     env: docker
-
-    dockerBuildCommand: >
-      docker build --secret id=DATABASE_URL,env=DATABASE_URL -t $RENDER_SERVICE_NAME .
-
     dockerfilePath: ./Dockerfile
-
+    
     startCommand: |
       php artisan migrate:fresh --seed --force &&
       php artisan config:cache &&
+      php artisan route:cache &&
+      php artisan view:cache &&
       apache2-foreground
-    
+
     envVars:
       - key: APP_KEY
         generateValue: true
@@ -29,7 +27,11 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: memory-palace-db
-          property: connectionString
+          property: internalConnectionString
+      - key: CACHE_DRIVER
+        value: file 
+      - key: SESSION_DRIVER
+        value: file 
 
 databases:
   - name: memory-palace-db
