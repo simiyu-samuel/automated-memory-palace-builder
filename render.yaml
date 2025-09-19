@@ -3,22 +3,22 @@ services:
     name: memory-palace-app
     plan: free
     region: oregon
-
     env: docker
- 
-    dockerfilePath: ./Dockerfile 
 
+    dockerBuildCommand: >
+      docker build --secret id=DATABASE_URL,env=DATABASE_URL -t $RENDER_SERVICE_NAME .
+
+    dockerfilePath: ./Dockerfile
+    
     envVars:
       - key: APP_KEY
-        sync: false 
+        generateValue: true
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
-      
       - key: APP_URL
         value: https://memory-palace-app.onrender.com
-
       - key: DB_CONNECTION
         value: pgsql
       - key: DATABASE_URL
