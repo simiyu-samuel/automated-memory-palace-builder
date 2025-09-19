@@ -1,4 +1,4 @@
-FROM node:18 AS assets
+FROM node:18-alpine AS assets
 WORKDIR /app
 COPY memory-palace-builder/package*.json ./
 RUN npm install
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     git unzip libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql pdo_pgsql zip exif pcntl \
-    && a2enmod rewrite # <-- Enable rewrite module
+    && a2enmod rewrite
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
@@ -22,18 +22,7 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 COPY --from=assets /app/public/build ./public/build
 
-RUN cp .env.example .env
-
-RUN php artisan key:generate
-RUN php artisan config:cache
-RUN php artisan view:cache
-RUN php artisan config:clear
-
-RUN --mount=type=secret,id=DATABASE_URL php artisan migrate:fresh --seed --force
-
 COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-RUN chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
-
-EXPOSE 80
+RUN chmod -R 777 /var/w
