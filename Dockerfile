@@ -22,9 +22,14 @@ RUN composer install --no-interaction --optimize-autoloader --no-dev --no-script
 
 COPY --from=assets /app/public/build ./public/build
 
-COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY 000-default.conf /etc/apache2/sites-available/000-default.configure
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 RUN chmod -R 777 /var/www/html/storage /var/www/html/bootstrap/cache
 
-EXPOSE 80
+ENTRYPOINT ["entrypoint.sh"]
+
+CMD ["apache2-foreground"]
