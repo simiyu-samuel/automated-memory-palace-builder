@@ -208,7 +208,7 @@ export default function Index({ auth }) {
                     {!loading && (
                         <div className="mb-6">
                             <p className="text-gray-600">
-                                Found <span className="font-semibold text-gray-900">{filteredMemories.length}</span> memories
+                                Found <span className="font-semibold text-gray-900">{memoizedFilteredMemories.length}</span> memories
                                 {searchTerm && ` matching "${searchTerm}"`}
                             </p>
                         </div>

@@ -12,7 +12,7 @@ createInertiaApp({
     resolve: (name) =>
         resolvePageComponent(
             `./Pages/${name}.jsx`,
-            import.meta.glob('./Pages/**/*.jsx'), // Removed eager: true for lazy loading
+            import.meta.glob('./Pages/**/*.jsx', { eager: true }), // Reverted to eager loading
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
