@@ -98,8 +98,8 @@ export default function GamePalaceRenderer({ rooms = [], memories = [], onObject
         const sunLight = new THREE.DirectionalLight(0xffffff, 1.2);
         sunLight.position.set(50, 50, 25);
         sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 4096;
-        sunLight.shadow.mapSize.height = 4096;
+        sunLight.shadow.mapSize.width = 1024; // Reduced from 4096
+        sunLight.shadow.mapSize.height = 1024; // Reduced from 4096
         sunLight.shadow.camera.near = 0.5;
         sunLight.shadow.camera.far = 200;
         sunLight.shadow.camera.left = -50;
@@ -108,19 +108,25 @@ export default function GamePalaceRenderer({ rooms = [], memories = [], onObject
         sunLight.shadow.camera.bottom = -50;
         scene.add(sunLight);
 
-        // Room lights
+        // Room lights (only one casts shadows for performance)
         const roomLights = [
-            { pos: [0, 8, 0], color: 0xffffff, intensity: 0.8 },      // Living room
-            { pos: [-25, 8, 0], color: 0x4a90e2, intensity: 0.7 },   // Work room
-            { pos: [25, 8, 0], color: 0x7ed321, intensity: 0.7 },    // Personal room
-            { pos: [0, 8, -25], color: 0xf5a623, intensity: 0.7 },   // Creative room
-            { pos: [0, 8, 25], color: 0xd0021b, intensity: 0.7 }     // Archive room
+            { pos: [0, 8, 0], color: 0xffffff, intensity: 0.8, castShadow: true },      // Living room
+            { pos: [-25, 8, 0], color: 0x4a90e2, intensity: 0.7, castShadow: false },   // Work room
+            { pos: [25, 8, 0], color: 0x7ed321, intensity: 0.7, castShadow: false },    // Personal room
+            { pos: [0, 8, -25], color: 0xf5a623, intensity: 0.7, castShadow: false },   // Creative room
+            { pos: [0, 8, 25], color: 0xd0021b, intensity: 0.7, castShadow: false }     // Archive room
         ];
 
         roomLights.forEach(light => {
             const pointLight = new THREE.PointLight(light.color, light.intensity, 30);
             pointLight.position.set(...light.pos);
-            pointLight.castShadow = true;
+            if (light.castShadow) {
+                pointLight.castShadow = true;
+                pointLight.shadow.mapSize.width = 512; // Reduced from default/implied 1024
+                pointLight.shadow.mapSize.height = 512; // Reduced from default/implied 1024
+            } else {
+                pointLight.castShadow = false;
+            }
             scene.add(pointLight);
         });
     };

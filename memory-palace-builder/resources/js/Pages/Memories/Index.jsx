@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // Added useMemo
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/react';
 import axios from 'axios';
@@ -62,7 +62,7 @@ export default function Index({ auth }) {
         });
     };
 
-    const MemoryCard = ({ memory }) => (
+    const MemoryCard = React.memo(({ memory }) => ( // Wrapped in React.memo
         <Link href={`/memories/${memory.id}`}>
             <div className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-gray-100 hover:border-blue-200 transform hover:-translate-y-1">
                 <div className="flex items-start justify-between mb-4">
@@ -113,14 +113,16 @@ export default function Index({ auth }) {
                 )}
             </div>
         </Link>
-    );
+    ));
 
-    const filteredMemories = memories.filter(memory => 
-        searchTerm === '' || 
-        memory.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        memory.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        memory.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+    const memoizedFilteredMemories = useMemo(() => { // Memoized filteredMemories
+        return memories.filter(memory => 
+            searchTerm === '' || 
+            memory.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            memory.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            memory.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        );
+    }, [memories, searchTerm]);
 
     return (
         <AuthenticatedLayout
@@ -220,13 +222,13 @@ export default function Index({ auth }) {
                                 <div className="text-gray-600">Loading memories...</div>
                             </div>
                         </div>
-                    ) : filteredMemories.length > 0 ? (
+                    ) : memoizedFilteredMemories.length > 0 ? (
                         <div className={`grid gap-6 ${
                             view === 'grid' 
                                 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
                                 : 'grid-cols-1'
                         }`}>
-                            {filteredMemories.map((memory) => (
+                            {memoizedFilteredMemories.map((memory) => (
                                 <MemoryCard key={memory.id} memory={memory} />
                             ))}
                         </div>
