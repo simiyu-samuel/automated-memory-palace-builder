@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['web', 'auth'])->group(function () {
     
     // Memory Management API
-    Route::apiResource('memories', MemoryController::class)->name('api.memories');
+    Route::apiResource('memories', MemoryController::class)->names('api.memories');
     
     // API Connection Management  
     Route::post('connections', function(\Illuminate\Http\Request $request) {
