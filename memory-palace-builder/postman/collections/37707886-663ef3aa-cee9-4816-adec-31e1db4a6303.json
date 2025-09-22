@@ -1,0 +1,1097 @@
+{
+	"info": {
+		"_postman_id": "37707886-663ef3aa-cee9-4816-adec-31e1db4a6303",
+		"name": "Memory Palace - Personal 3D Memory Management System",
+		"description": "StartFragment\n\n# Memory Palace - Your Digital Life in 3D Space\n\n**Stop drowning in digital chaos. Start exploring your memories.**\n\nLike most people, I was losing important memories in the endless scroll of emails, photos, and calendar events. Instead of building another folder system, I created something revolutionary: **Memory Palace** - an automated 3D world that transforms your digital life into an explorable, spatial experience.\n\n## What Makes This Different\n\n**Zero-effort setup meets intelligent organization.** Connect your Gmail and Calendar, and watch as your digital memories automatically materialize as interactive 3D objects in a personalized virtual space.\n\n### Features:\n\n- **Fully Automated** - No manual room creation or object placement required\n    \n- **Real Data Integration** - Your actual emails become explorable 3D objects\n    \n- **Real-Time Sync** - New memories instantly appear in your palace\n    \n- **MCP Server Integration** - 3 custom tools for intelligent memory processing\n    \n- **AI-Powered Insights** - Discover hidden patterns in your digital behavior\n    \n\n## The Problem Solved\n\n**Before:** Endless scrolling through Gmail threads, forgotten photos, lost meeting notes **After:** Spatial navigation where work emails appear as cubes in your “Professional Zone” and family photos float in your “Personal Gallery” - everything positioned based on context, date, and relationships.\n\n## Technical Innovation\n\n**Automated 3D Pipeline:**\n\n```\nAPI Data → MCP Processing → Laravel Backend → Three.js Rendering\n\n ```\n\n- **Smart Positioning Algorithm** - Prevents overlaps, creates meaningful spatial relationships\n    \n- **Production Architecture** - Laravel + PostgreSQL + OAuth + Queue Jobs\n    \n- **Modern Frontend** - React.js + Three.js for smooth 3D interactions\n    \n- **MCP Tools** - `collect_memories`, `search_memories`, `create_memory_object`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "🚀 Getting Started",
+			"item": [
+				{
+					"name": "Health Check",
+					"id": "37707886-a5f15e6b-2acf-470f-a5aa-e0d545222128",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/{{api_version}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"{{api_version}}",
+								"health"
+							]
+						},
+						"description": "Verify that the Memory Palace API is running and responsive"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Palace Overview",
+					"id": "37707886-81260bbc-afbf-4fad-99d2-f4885112f4b6",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/{{api_version}}/palace/overview?user_id={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"{{api_version}}",
+								"palace",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}",
+									"description": "User ID for palace data"
+								}
+							]
+						},
+						"description": "Get a complete overview of your memory palace including room count, memory statistics, and recent activity"
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-f8c51e1e-c25c-44d6-ab78-ced3f52d321e",
+			"description": "Essential endpoints to get your Memory Palace up and running"
+		},
+		{
+			"name": "🤖 MCP Server Integration",
+			"item": [
+				{
+					"name": "MCP - Sync All Connections",
+					"id": "37707886-6290035e-935b-477d-9e37-1eb15f105183",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"gmail\",\n  \"max_results\": 50,\n  \"include_attachments\": true,\n  \"date_range\": \"7d\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/sync-all",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"sync-all"
+							]
+						},
+						"description": "**MCP Tool: syncViaMP**\n\nAutomatically gather memories from all connected services using MCP server integration.\n\n**What happens automatically:**\n1. Fetches data from all active connections\n2. AI analyzes sentiment and content via MCP\n3. Assigns memories to appropriate palace rooms\n4. Generates 3D object specifications\n5. Creates spatial positioning"
+					},
+					"response": []
+				},
+				{
+					"name": "MCP - Sync Single Connection",
+					"id": "37707886-31b3a105-2afc-48a3-9ede-edb954b35b76",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"gmail\",\n  \"max_results\": 25\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/connections/{{connection_id}}/sync",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"{{connection_id}}",
+								"sync"
+							]
+						},
+						"description": "Sync a specific API connection using MCP server for intelligent processing."
+					},
+					"response": []
+				},
+				{
+					"name": "MCP - Search Memories",
+					"id": "37707886-25e67c57-78e2-4872-8c4a-509870e9b218",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"query\": \"project meeting\",\n  \"sentiment\": \"positive\",\n  \"type\": \"email\",\n  \"max_results\": 20\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/search-mcp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"search-mcp"
+							]
+						},
+						"description": "**MCP Tool: searchViaMP**\n\nIntelligent search across all memories using MCP server with AI-powered filtering and relevance scoring.\n\n**Search capabilities:**\n- Full-text search across all memory content\n- Sentiment-based filtering\n- Type-specific searches\n- AI-powered relevance ranking"
+					},
+					"response": []
+				},
+				{
+					"name": "Simple Gmail Sync (Production)",
+					"id": "37707886-3ca87fb9-da1f-4b3e-8d7a-c09694bd44fa",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/simple-sync/{{connection_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"simple-sync",
+								"{{connection_id}}"
+							]
+						},
+						"description": "**Production Gmail Sync**\n\nDirect Gmail data sync using real OAuth tokens. This endpoint:\n1. Validates active Gmail connection\n2. Fetches real Gmail data using access tokens\n3. Processes emails through MemoryCollectionService\n4. Returns actual import statistics"
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-c8da5490-574f-497c-b1e9-9b243720b822",
+			"description": "Endpoints that demonstrate MCP (Model Context Protocol) server capabilities"
+		},
+		{
+			"name": "📧 Memory Collection & Processing",
+			"item": [
+				{
+					"name": "Create API Connection",
+					"id": "37707886-6c3945a7-37bc-4b8e-b92d-db6c40f35ae9",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"gmail\",\n  \"email\": \"your.email@gmail.com\",\n  \"account_name\": \"My Gmail Account\",\n  \"scopes\": [\"https://www.googleapis.com/auth/gmail.readonly\"]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/connections",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"connections"
+							]
+						},
+						"description": "Create a new API connection for automated memory collection. The system will:\n\n1. **Create connection record** with your provider details\n2. **Generate OAuth URL** for secure authorization\n3. **Return authorization link** to complete setup\n4. **Enable auto-sync** once authorized\n\n**Supported providers**: gmail, google_calendar, google_photos, spotify, location_services"
+					},
+					"response": []
+				},
+				{
+					"name": "Update API Connection",
+					"id": "37707886-7dbb59d7-76e3-4786-a1bf-c3f6671df31e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"updated.email@gmail.com\",\n  \"account_name\": \"Updated Account Name\",\n  \"scopes\": [\"https://www.googleapis.com/auth/gmail.readonly\", \"https://www.googleapis.com/auth/gmail.metadata\"],\n  \"sync_frequency\": \"hourly\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/connections/{{connection_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"{{connection_id}}"
+							]
+						},
+						"description": "Update an existing API connection's settings and metadata."
+					},
+					"response": []
+				},
+				{
+					"name": "Delete API Connection",
+					"id": "37707886-e78b7fba-cbbf-4e9f-9f2a-abd5bb384a2f",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/connections/{{connection_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"{{connection_id}}"
+							]
+						},
+						"description": "Remove an API connection and stop syncing data from that provider."
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Connection Token",
+					"id": "37707886-67e0e07e-f981-423d-b50d-44f65f119400",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/connections/{{connection_id}}/refresh-token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"connections",
+								"{{connection_id}}",
+								"refresh-token"
+							]
+						},
+						"description": "Refresh OAuth tokens for a connection to maintain access to external APIs."
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-b843a499-2a11-449b-9339-f0f59d818b11",
+			"description": "Automated memory collection from various data sources"
+		},
+		{
+			"name": "🏰 3D Palace Management",
+			"item": [
+				{
+					"name": "Get Palace Rooms",
+					"id": "37707886-68f6ac38-92f5-4707-9afb-a7bd0c9b5544",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/palace-rooms?user_id={{user_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"palace-rooms"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "{{user_id}}"
+								},
+								{
+									"key": "name",
+									"value": "",
+									"description": "Filter by room name",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all palace rooms for a user with their configuration data.\n\n**Response includes:**\n- Room themes and moods\n- Color schemes and positioning\n- Lighting configuration\n- Dimensions and connections\n- Active status"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Palace Room",
+					"id": "37707886-c6ec6f85-d819-4888-8d9b-bc4a4537ebb6",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"user_id\": {{user_id}},\n  \"name\": \"Creative Space\",\n  \"description\": \"Room for creative memories and artistic content\",\n  \"theme\": \"artistic\",\n  \"mood\": \"inspiring\",\n  \"color_scheme\": [\"#ff6b6b\", \"#4ecdc4\", \"#45b7d1\"],\n  \"position\": {\"x\": 0, \"y\": 0, \"z\": -20},\n  \"dimensions\": {\"width\": 15, \"height\": 10, \"depth\": 15},\n  \"lighting\": {\"ambient\": 0.4, \"directional\": 0.8, \"color\": \"#ffd700\"},\n  \"connections\": [],\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/palace-rooms",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"palace-rooms"
+							]
+						},
+						"description": "Create a new themed room in your memory palace with custom configuration."
+					},
+					"response": []
+				},
+				{
+					"name": "Get Memory Objects (Authenticated)",
+					"id": "37707886-486e9fb9-4507-4539-b206-ee8ecbdf1211",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/memory-objects?room_id={{room_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memory-objects"
+							],
+							"query": [
+								{
+									"key": "room_id",
+									"value": "{{room_id}}",
+									"description": "Filter by specific palace room"
+								}
+							]
+						},
+						"description": "Retrieve all 3D memory objects with their complete spatial positioning and rendering data.\n\n**Response includes:**\n- 3D coordinates and transformations\n- Object geometry and materials\n- Animation parameters\n- Interaction behaviors\n- Associated memory data"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Memory Object",
+					"id": "37707886-5b112d78-c8b5-4207-88aa-3095c537f2d5",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"memory_id\": 1,\n  \"palace_room_id\": 1,\n  \"object_type\": \"email\",\n  \"title\": \"Important Project Email\",\n  \"description\": \"Email about Q4 project deliverables\",\n  \"position\": {\"x\": 2.5, \"y\": 1.5, \"z\": -1.2},\n  \"rotation\": {\"x\": 0, \"y\": 0, \"z\": 0},\n  \"scale\": {\"x\": 1.0, \"y\": 1.0, \"z\": 1.0},\n  \"color\": [\"#10b981\", \"#065f46\", \"#047857\"],\n  \"importance_score\": 0.8,\n  \"is_visible\": true,\n  \"is_interactive\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/memory-objects",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memory-objects"
+							]
+						},
+						"description": "Create a 3D object representation of a memory with detailed spatial and visual configuration."
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-20125635-dafc-4c11-ab20-2f56d58a8469",
+			"description": "Manage your 3D memory palace structure and objects"
+		},
+		{
+			"name": "🔍 Memory Search & Analytics",
+			"item": [
+				{
+					"name": "Advanced Memory Search (Web)",
+					"id": "37707886-8e7e5e59-ee99-47ed-b42d-5ded97ce9879",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"q\": \"project meeting\",\n  \"type\": \"email\",\n  \"sentiment\": \"positive\",\n  \"room_id\": 1,\n  \"tags\": [\"work\", \"important\"],\n  \"date_from\": \"2024-01-01\",\n  \"date_to\": \"2024-12-31\",\n  \"is_favorite\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/memories/search",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memories",
+								"search"
+							]
+						},
+						"description": "**Advanced Memory Search**\n\nPowerful search with multiple filtering options and pagination.\n\n**Search features:**\n- **Full-text search** across title, content, description\n- **Multi-dimensional filtering** by type, sentiment, room, tags\n- **Date range queries** for temporal filtering\n- **Favorite memories** filtering\n- **Paginated results** (20 per page)\n- **Sorted by memory date** (newest first)"
+					},
+					"response": []
+				},
+				{
+					"name": "Advanced Memory Search",
+					"id": "37707886-7856dc41-f85e-4343-8f63-da21c7f69739",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/{{api_version}}/memories?search=important project&type=email&sentiment=positive&room=Work Space&limit=20&sort_by=relevance",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"{{api_version}}",
+								"memories"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "important project",
+									"description": "Full-text search query"
+								},
+								{
+									"key": "type",
+									"value": "email",
+									"description": "Memory type filter"
+								},
+								{
+									"key": "sentiment",
+									"value": "positive",
+									"description": "AI sentiment filter"
+								},
+								{
+									"key": "room",
+									"value": "Work Space",
+									"description": "Palace room filter"
+								},
+								{
+									"key": "limit",
+									"value": "20",
+									"description": "Results per page"
+								},
+								{
+									"key": "sort_by",
+									"value": "relevance",
+									"description": "Sort order: relevance, date, importance"
+								}
+							]
+						},
+						"description": "Powerful search across all memories with multiple filtering options and AI-powered relevance ranking.\n\n**Search features:**\n- **Full-text indexing** of all memory content\n- **AI-powered relevance** scoring\n- **Multi-dimensional filtering** by type, sentiment, room, date\n- **Fuzzy matching** for typos and variations"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Memory Statistics",
+					"id": "37707886-eea47266-5721-4711-ab92-333713b26751",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/memories/stats",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memories",
+								"stats"
+							]
+						},
+						"description": "Get comprehensive statistics about your memory collection.\n\n**Statistics include:**\n- Total memory count by type\n- Sentiment analysis breakdown\n- Room distribution\n- Recent activity trends\n- Import statistics by provider"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Memories for 3D Rendering",
+					"id": "37707886-34a9b752-7439-41c7-ad8b-17a7b30eaec4",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/memories/for-3d",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memories",
+								"for-3d"
+							]
+						},
+						"description": "Get processed memories optimized for 3D palace rendering with spatial data."
+					},
+					"response": []
+				},
+				{
+					"name": "Find Related Memories",
+					"id": "37707886-401c11e8-d5ef-4bb7-81b3-f3c7374777cb",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/memories/{{memory_id}}/related",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memories",
+								"{{memory_id}}",
+								"related"
+							]
+						},
+						"description": "Discover AI-powered connections between memories across different platforms and time periods.\n\n**Connection types:**\n- **Semantic**: Similar topics, keywords, content themes\n- **Temporal**: Memories from same time periods\n- **Personal**: Same people, locations, or contexts\n- **Causal**: Events that led to other events"
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-2b673959-9d6a-41f4-9d2e-fdf914b032ca",
+			"description": "Advanced search and analytics for your memory data"
+		},
+		{
+			"name": "⚙️ API Configuration & Management",
+			"item": [
+				{
+					"name": "Get User Connections (No Auth)",
+					"id": "37707886-6991c2f7-9b66-4c74-ac67-5b02e0b01861",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/users/{{user_id}}/connections",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"{{user_id}}",
+								"connections"
+							]
+						},
+						"description": "**MCP Server Endpoint** - Get user connections without authentication for MCP server use.\n\nView all connected services and their sync status.\n\n**Supported integrations:**\n- Gmail (email memories)\n- Google Calendar (event memories)\n- Google Photos (photo memories)\n- Spotify (music memories)\n- Location Services (place memories)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Processing Logs",
+					"id": "37707886-45497c41-7704-4cda-8f4c-c868196b5ad2",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/processing-logs",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"processing-logs"
+							]
+						},
+						"description": "View recent processing logs for monitoring sync jobs and data collection activities.\n\n**Log information:**\n- Job type and status\n- Processing time metrics\n- Error messages and debugging info\n- Recent 50 entries"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Insights",
+					"id": "37707886-b10ac513-912b-4592-93e1-d455f9a84d11",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/insights",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"insights"
+							]
+						},
+						"description": "Get AI-generated insights about your digital life patterns and memory trends.\n\n**Insights include:**\n- Behavioral patterns\n- Communication trends\n- Memory importance scoring\n- Relationship mapping\n- Activity recommendations"
+					},
+					"response": []
+				},
+				{
+					"name": "Trigger Manual Memory Collection",
+					"id": "37707886-03cb9360-b033-4403-afe8-d2844fb52c4e",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"provider\": \"gmail\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/collect-memories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"collect-memories"
+							]
+						},
+						"description": "Manually trigger memory collection from all or specific providers using background jobs.\n\n**Process:**\n1. Dispatches CollectMemoriesJob for active connections\n2. Jobs run in background queue\n3. AI processes and categorizes new memories\n4. 3D objects generated automatically\n5. Palace updated in real-time"
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-6027322a-8954-4ade-966d-9edc52686868",
+			"description": "Manage API connections, settings, and system configuration"
+		},
+		{
+			"name": "🎮 Interactive Features Demo",
+			"item": [
+				{
+					"name": "Health Check",
+					"id": "37707886-995a6e36-bf0b-4e41-8e22-1872f3ccf33c",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"health"
+							]
+						},
+						"description": "**System Health Check**\n\nVerify that all Memory Palace services are running properly.\n\n**Health indicators:**\n- Database connectivity\n- Cache system status\n- Queue system status\n- API version information\n- Current timestamp"
+					},
+					"response": []
+				},
+				{
+					"name": "API Test Endpoint",
+					"id": "37707886-6562968d-d496-49b5-b8be-14a8146ebcef",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/test",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"test"
+							]
+						},
+						"description": "Test API connectivity and authentication status."
+					},
+					"response": []
+				},
+				{
+					"name": "Real-time Palace Updates",
+					"id": "37707886-7d42094c-9f42-40bd-a535-e68a350b8148",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "X-CSRF-TOKEN",
+								"value": "{{csrf_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/palace/updates?since={{timestamp}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"palace",
+								"updates"
+							],
+							"query": [
+								{
+									"key": "since",
+									"value": "{{timestamp}}",
+									"description": "ISO timestamp of last update check"
+								}
+							]
+						},
+						"description": "**Real-time Palace Synchronization**\n\nGet real-time updates for the 3D palace to synchronize new memories and object changes.\n\n**Update types:**\n- **New memories**: Recently imported from APIs\n- **Room assignments**: AI-determined palace room placement\n- **3D object data**: Position, geometry, materials\n- **Memory metadata**: Title, type, sentiment, dates\n\n**Perfect for:**\n- Live palace rendering updates\n- Real-time memory notifications\n- Dynamic 3D scene synchronization"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Memory (No Auth - MCP)",
+					"id": "37707886-40f0f02c-4cc8-4bc4-980d-313000dc78c8",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"{{demo_content}}\",\n  \"content\": \"Sample memory content with important details about the project meeting\",\n  \"type\": \"email\",\n  \"user_id\": {{user_id}},\n  \"api_connection_id\": 1,\n  \"source_data\": {\n    \"message_id\": \"msg_123\",\n    \"from\": \"colleague@company.com\",\n    \"subject\": \"{{demo_content}}\"\n  },\n  \"memory_date\": \"2024-12-15T10:30:00Z\",\n  \"sentiment\": \"positive\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/memories",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"memories"
+							]
+						},
+						"description": "**MCP Server Endpoint** - Create memories directly without authentication for MCP server integration.\n\nThis endpoint allows the MCP server to create processed memories with:\n- AI-determined sentiment analysis\n- Automatic type classification\n- Source platform integration\n- Metadata preservation"
+					},
+					"response": []
+				}
+			],
+			"id": "37707886-32ace5df-a5b1-4148-af94-eb526ac98f8a",
+			"description": "Showcase the unique interactive capabilities of the Memory Palace"
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{auth_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set dynamic timestamps for requests",
+					"pm.globals.set('timestamp', Date.now());",
+					"",
+					"// Generate random demo data for testing",
+					"pm.globals.set('random_x', (Math.random() * 8 - 4).toFixed(2));",
+					"pm.globals.set('random_y', (1 + Math.random() * 2).toFixed(2));",
+					"pm.globals.set('random_z', (Math.random() * 6 - 3).toFixed(2));",
+					"",
+					"// Set demo memory content",
+					"const demoContents = [",
+					"  'Project meeting about Q4 goals',",
+					"  'Vacation photos from Italy',",
+					"  'Call with mom about birthday plans',",
+					"  'Important presentation slides',",
+					"  'Weekend hiking adventure'",
+					"];",
+					"pm.globals.set('demo_content', demoContents[Math.floor(Math.random() * demoContents.length)]);"
+				],
+				"id": "c0ba69c4-7b29-4337-828b-4aad15baa344"
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Test that responses are properly formatted",
+					"pm.test('Response status is successful', function () {",
+					"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+					"});",
+					"",
+					"pm.test('Response has valid JSON format', function () {",
+					"    pm.expect(pm.response.json).to.not.be.undefined;",
+					"});",
+					"",
+					"// Log response for debugging",
+					"console.log('Memory Palace API Response:', pm.response.json());"
+				],
+				"id": "e8e28ca1-a6d2-415f-a2e5-2375fab8063a"
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"description": "Base URL for Memory Palace API (Laravel local server)"
+		},
+		{
+			"key": "user_id",
+			"value": "2",
+			"description": "Demo user ID (from Laravel seeder)"
+		},
+		{
+			"key": "connection_id",
+			"value": "1",
+			"description": "API connection ID for testing"
+		},
+		{
+			"key": "memory_id",
+			"value": "1",
+			"description": "Sample memory ID for related endpoints"
+		},
+		{
+			"key": "room_id",
+			"value": "1",
+			"description": "Palace room ID for filtering"
+		},
+		{
+			"key": "csrf_token",
+			"value": "",
+			"description": "Laravel CSRF token (get from login page meta tag)"
+		}
+	]
+}
