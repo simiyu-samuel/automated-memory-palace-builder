@@ -6,13 +6,6 @@ services:
     env: docker
     dockerfilePath: ./Dockerfile
     
-    startCommand: |
-      php artisan migrate:fresh --seed --force &&
-      php artisan config:cache &&
-      php artisan route:cache &&
-      php artisan view:cache &&
-      apache2-foreground
-
     envVars:
       - key: APP_KEY
         generateValue: true
@@ -29,9 +22,9 @@ services:
           name: memory-palace-db
           property: internalConnectionString
       - key: CACHE_DRIVER
-        value: file 
+        value: file
       - key: SESSION_DRIVER
-        value: file 
+        value: file
 
 databases:
   - name: memory-palace-db
