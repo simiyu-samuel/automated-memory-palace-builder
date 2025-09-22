@@ -65,7 +65,7 @@ npm run mcp-server         # MCP server
 ```
 
 ### Demo Access
-- **URL**: http://127.0.0.1:8000
+- **URL**: https://memory-palace-app.onrender.com/
 - **Login**: simiyusamuel869@gmail.com
 - **Password**: password
 
