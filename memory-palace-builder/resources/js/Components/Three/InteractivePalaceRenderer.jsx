@@ -109,8 +109,8 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
         const moonLight = new THREE.DirectionalLight(0xb8c5ff, 1.2);
         moonLight.position.set(15, 25, 10);
         moonLight.castShadow = true;
-        moonLight.shadow.mapSize.width = 4096;
-        moonLight.shadow.mapSize.height = 4096;
+        moonLight.shadow.mapSize.width = 1024; // Reduced from 4096
+        moonLight.shadow.mapSize.height = 1024; // Reduced from 4096
         moonLight.shadow.camera.near = 0.5;
         moonLight.shadow.camera.far = 100;
         moonLight.shadow.camera.left = -30;
@@ -120,7 +120,7 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
         moonLight.shadow.bias = -0.0001;
         scene.add(moonLight);
 
-        // Magical palace lights
+        // Magical palace lights (only one casts shadows for performance)
         const colors = [0x7c3aed, 0xfbbf24, 0x10b981, 0xef4444, 0x3b82f6];
         for (let i = 0; i < 5; i++) {
             const light = new THREE.PointLight(colors[i], 1.5, 25);
@@ -130,9 +130,14 @@ export default function InteractivePalaceRenderer({ rooms = [], memories = [], o
                 8 + Math.sin(i) * 2,
                 Math.sin(angle) * 12
             );
-            light.castShadow = true;
-            light.shadow.mapSize.width = 1024;
-            light.shadow.mapSize.height = 1024;
+            // Only the first point light casts shadows to reduce overhead
+            if (i === 0) {
+                light.castShadow = true;
+                light.shadow.mapSize.width = 512; // Reduced from 1024
+                light.shadow.mapSize.height = 512; // Reduced from 1024
+            } else {
+                light.castShadow = false;
+            }
             scene.add(light);
         }
 
