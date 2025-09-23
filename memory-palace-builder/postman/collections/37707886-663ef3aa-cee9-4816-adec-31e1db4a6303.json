@@ -866,12 +866,13 @@
 							"raw": "{\n  \"provider\": \"gmail\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/collect-memories",
+							"raw": "{{base_url}}/api/{{api_version}}/collect-memories",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"collect-memories"
 							]
 						},
