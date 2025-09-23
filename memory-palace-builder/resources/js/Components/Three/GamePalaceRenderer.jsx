@@ -742,6 +742,9 @@ export default function GamePalaceRenderer({ rooms = [], memories = [], onObject
             // Update character movement
             updateCharacterMovement();
             
+            // Always update camera, even if character is not moving, to allow drag rotation
+            updateCamera();
+
             const time = Date.now() * 0.001;
             
             // Animate floating memory objects
