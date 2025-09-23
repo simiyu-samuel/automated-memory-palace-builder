@@ -6,9 +6,11 @@ import MemoryModal from '@/Components/Palace/MemoryModal';
 import Dashboard from '@/Components/Palace/Dashboard';
 import axios from 'axios';
 
-// Configure axios to include CSRF token
+// Configure axios to include CSRF token (relying on XSRF-TOKEN cookie for automatic handling)
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+// Ensure cookies are sent with requests for session authentication
+axios.defaults.withCredentials = true;
+// axios.defaults.headers.common['X-CSRF-TOKEN'] is typically handled automatically by axios from XSRF-TOKEN cookie
 
 export default function Index({ auth, rooms: initialRooms = [], memories: initialMemories = [], stats: initialStats = {} }) {
     const [view, setView] = useState('dashboard'); // 'dashboard' | '3d'
@@ -20,12 +22,14 @@ export default function Index({ auth, rooms: initialRooms = [], memories: initia
     const [loading, setLoading] = useState(false);
     const [currentRoom, setCurrentRoom] = useState(null);
 
-    // Load 3D data when switching to 3D view
+    // Load 3D data when switching to 3D view or if user is not authenticated
     useEffect(() => {
-        if (view === '3d') {
+        if (!auth.user) {
+            loginAsTestUser();
+        } else if (view === '3d') {
             load3DData();
         }
-    }, [view]);
+    }, [view, auth.user]);
 
     const load3DData = async () => {
         setLoading(true);
@@ -92,13 +96,28 @@ export default function Index({ auth, rooms: initialRooms = [], memories: initia
     
     const loginAsTestUser = async () => {
         try {
+            // For web authentication, Inertia's axios setup should handle CSRF automatically
+            // The /sanctum/csrf-cookie endpoint is primarily for SPA authentication with Sanctum tokens,
+            // but for session-based login, the browser handles the XSRF-TOKEN cookie.
+            // We just need to ensure the POST request is made to the correct web login route.
+            
             await axios.post('/login', {
                 email: 'simiyusamuel869@gmail.com',
                 password: 'password'
             });
+            console.log('Login successful via web route.');
             window.location.reload();
         } catch (error) {
             console.error('Login failed:', error);
+            if (error.response) {
+                console.error('Login error status:', error.response.status);
+                console.error('Login error data:', error.response.data);
+                if (error.response.status === 419) {
+                    console.error('419 Page Expired error. This usually means the CSRF token is invalid or missing.');
+                }
+            } else {
+                console.error('Network error or other issue during login:', error.message);
+            }
         }
     };
 
