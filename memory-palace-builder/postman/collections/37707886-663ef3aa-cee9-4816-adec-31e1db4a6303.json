@@ -689,12 +689,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/memories/for-3d",
+							"raw": "{{base_url}}/api/{{api_version}}/memories/for-3d",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memories",
 								"for-3d"
 							]
