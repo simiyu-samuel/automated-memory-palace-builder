@@ -105,12 +105,13 @@
 							"raw": "{\n  \"provider\": \"gmail\",\n  \"max_results\": 50,\n  \"include_attachments\": true,\n  \"date_range\": \"7d\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/sync-all",
+							"raw": "{{base_url}}/api/{{api_version}}/sync-all",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"sync-all"
 							]
 						},
