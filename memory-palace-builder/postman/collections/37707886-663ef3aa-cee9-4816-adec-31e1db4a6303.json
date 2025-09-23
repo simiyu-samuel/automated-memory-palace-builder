@@ -1018,7 +1018,9 @@
 		{
 			"listen": "prerequest",
 			"script": {
+				"id": "b8d6cd70-ebba-4a5f-bf00-288c517bf30c",
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					"// Set dynamic timestamps for requests",
 					"pm.globals.set('timestamp', Date.now());",
@@ -1037,14 +1039,15 @@
 					"  'Weekend hiking adventure'",
 					"];",
 					"pm.globals.set('demo_content', demoContents[Math.floor(Math.random() * demoContents.length)]);"
-				],
-				"id": "c0ba69c4-7b29-4337-828b-4aad15baa344"
+				]
 			}
 		},
 		{
 			"listen": "test",
 			"script": {
+				"id": "620bc27b-85b3-4e20-9866-73c880a99d4f",
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					"// Test that responses are properly formatted",
 					"pm.test('Response status is successful', function () {",
@@ -1057,8 +1060,7 @@
 					"",
 					"// Log response for debugging",
 					"console.log('Memory Palace API Response:', pm.response.json());"
-				],
-				"id": "e8e28ca1-a6d2-415f-a2e5-2375fab8063a"
+				]
 			}
 		}
 	],
