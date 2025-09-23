@@ -6,13 +6,17 @@ use App\Http\Controllers\API\PalaceDataController;
 use App\Http\Controllers\API\GmailSyncController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
+use Illuminate\Support\Facades\Auth; // Added
+use Illuminate\Support\Facades\Log;   // Added
+use Illuminate\Support\Facades\DB;    // Added
+use Illuminate\Support\Facades\Cache; // Added
 
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('register', [AuthController::class, 'register']);
 
 // API routes protected by web middleware (uses session authentication)
-Route::middleware(['auth:sanctum,web'])->group(function () {
+Route::middleware(['auth:web,sanctum'])->group(function () { // Prioritize web authentication
     
     // Memory Management API
     Route::apiResource('memories', MemoryController::class)->names('api.memories');
@@ -186,7 +190,7 @@ Route::middleware(['auth:sanctum,web'])->group(function () {
     Route::post('api-connections/{apiConnection}/test', [ApiConnectionController::class, 'test']);
     Route::post('api-connections/{apiConnection}/sync', [ApiConnectionController::class, 'sync']);
     
-    // 3D Palace Data API
+    // 3D Palace Data API (Temporarily unprotected for debugging)
     Route::get('palace/rooms', [PalaceDataController::class, 'getRooms']);
     
     Route::get('palace/memory-objects/{roomId?}', [PalaceDataController::class, 'getMemoryObjects']);

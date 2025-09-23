@@ -22,6 +22,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             'auth:sanctum',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // Explicitly add session middleware for API routes that need session authentication
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         ]);
 
         // Handle Inertia requests
