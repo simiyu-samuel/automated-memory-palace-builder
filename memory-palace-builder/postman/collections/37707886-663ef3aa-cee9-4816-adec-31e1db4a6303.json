@@ -902,12 +902,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/health",
+							"raw": "{{base_url}}/api/{{api_version}}/health",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"health"
 							]
 						},
