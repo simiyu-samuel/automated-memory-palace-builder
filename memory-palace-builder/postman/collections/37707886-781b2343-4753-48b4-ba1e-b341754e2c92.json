@@ -1744,7 +1744,9 @@
 		{
 			"listen": "prerequest",
 			"script": {
+				"id": "fe5c737c-ae5c-44ae-a563-8cd314b8370e",
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					"// Auto-fetch CSRF token if not available",
 					"if (!pm.globals.get('csrf_token') || pm.globals.get('csrf_token') === '') {",
@@ -1789,14 +1791,15 @@
 					"    'Weekend hiking adventure'",
 					"];",
 					"pm.globals.set('demo_content', demoContents[Math.floor(Math.random() * demoContents.length)]);"
-				],
-				"id": "47991e6e-8bcb-48d4-8dbc-cc1ca89b5e08"
+				]
 			}
 		},
 		{
 			"listen": "test",
 			"script": {
+				"id": "6c544779-194f-404f-b31b-64038b8849c1",
 				"type": "text/javascript",
+				"requests": {},
 				"exec": [
 					"// Handle authentication errors",
 					"if (pm.response.code === 401) {",
@@ -1861,8 +1864,7 @@
 					"} else {",
 					"    console.log('✅ Request successful (' + pm.response.code + ')');",
 					"}"
-				],
-				"id": "e97fc487-52b9-4068-88e9-5fe36315d8db"
+				]
 			}
 		}
 	],
