@@ -15,10 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
         ]);
 
         // API throttling
         $middleware->api(prepend: [
+            'auth:sanctum',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
