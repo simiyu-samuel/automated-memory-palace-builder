@@ -560,12 +560,13 @@
 							"raw": "{\n  \"q\": \"project meeting\",\n  \"type\": \"email\",\n  \"sentiment\": \"positive\",\n  \"room_id\": 1,\n  \"tags\": [\"work\", \"important\"],\n  \"date_from\": \"2024-01-01\",\n  \"date_to\": \"2024-12-31\",\n  \"is_favorite\": false\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/memories/search",
+							"raw": "{{base_url}}/api/{{api_version}}/memories/search",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memories",
 								"search"
 							]
