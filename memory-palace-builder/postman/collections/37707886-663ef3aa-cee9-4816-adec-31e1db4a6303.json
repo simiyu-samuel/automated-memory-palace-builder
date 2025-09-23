@@ -935,12 +935,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/test",
+							"raw": "{{base_url}}/api/{{api_version}}/test",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"test"
 							]
 						},
