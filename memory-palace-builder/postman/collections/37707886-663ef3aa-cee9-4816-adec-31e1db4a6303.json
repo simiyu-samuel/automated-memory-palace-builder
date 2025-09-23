@@ -141,12 +141,13 @@
 							"raw": "{\n  \"provider\": \"gmail\",\n  \"max_results\": 25\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/connections/{{connection_id}}/sync",
+							"raw": "{{base_url}}/api/{{api_version}}/connections/{{connection_id}}/sync",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"connections",
 								"{{connection_id}}",
 								"sync"
