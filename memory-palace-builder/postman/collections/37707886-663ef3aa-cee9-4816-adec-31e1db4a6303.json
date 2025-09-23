@@ -516,12 +516,13 @@
 							"raw": "{\n  \"memory_id\": 1,\n  \"palace_room_id\": 1,\n  \"object_type\": \"email\",\n  \"title\": \"Important Project Email\",\n  \"description\": \"Email about Q4 project deliverables\",\n  \"position\": {\"x\": 2.5, \"y\": 1.5, \"z\": -1.2},\n  \"rotation\": {\"x\": 0, \"y\": 0, \"z\": 0},\n  \"scale\": {\"x\": 1.0, \"y\": 1.0, \"z\": 1.0},\n  \"color\": [\"#10b981\", \"#065f46\", \"#047857\"],\n  \"importance_score\": 0.8,\n  \"is_visible\": true,\n  \"is_interactive\": true\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/memory-objects",
+							"raw": "{{base_url}}/api/{{api_version}}/memory-objects",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memory-objects"
 							]
 						},
