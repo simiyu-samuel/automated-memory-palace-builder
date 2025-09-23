@@ -796,12 +796,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/processing-logs",
+							"raw": "{{base_url}}/api/{{api_version}}/processing-logs",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"processing-logs"
 							]
 						},
