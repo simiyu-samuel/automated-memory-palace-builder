@@ -761,12 +761,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/users/{{user_id}}/connections",
+							"raw": "{{base_url}}/api/{{api_version}}/users/{{user_id}}/connections",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"users",
 								"{{user_id}}",
 								"connections"
