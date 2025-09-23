@@ -296,12 +296,13 @@
 							"raw": "{\n  \"email\": \"updated.email@gmail.com\",\n  \"account_name\": \"Updated Account Name\",\n  \"scopes\": [\"https://www.googleapis.com/auth/gmail.readonly\", \"https://www.googleapis.com/auth/gmail.metadata\"],\n  \"sync_frequency\": \"hourly\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/connections/{{connection_id}}",
+							"raw": "{{base_url}}/api/{{api_version}}/connections/{{connection_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"connections",
 								"{{connection_id}}"
 							]
