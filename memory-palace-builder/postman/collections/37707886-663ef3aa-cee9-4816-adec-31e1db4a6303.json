@@ -214,12 +214,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/simple-sync/{{connection_id}}",
+							"raw": "{{base_url}}/api/{{api_version}}/simple-sync/{{connection_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"simple-sync",
 								"{{connection_id}}"
 							]
