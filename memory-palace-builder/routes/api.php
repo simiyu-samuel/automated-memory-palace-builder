@@ -5,11 +5,14 @@ use App\Http\Controllers\API\ApiConnectionController;
 use App\Http\Controllers\API\PalaceDataController;
 use App\Http\Controllers\API\GmailSyncController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\AuthController;
 
 
+Route::post('login', [AuthController::class, 'login']);
+Route::post('register', [AuthController::class, 'register']);
 
 // API routes protected by web middleware (uses session authentication)
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['auth:sanctum,web'])->group(function () {
     
     // Memory Management API
     Route::apiResource('memories', MemoryController::class)->names('api.memories');
