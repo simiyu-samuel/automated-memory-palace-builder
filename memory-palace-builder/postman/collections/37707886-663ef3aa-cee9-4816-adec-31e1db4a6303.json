@@ -476,12 +476,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/memory-objects?room_id={{room_id}}",
+							"raw": "{{base_url}}/api/{{api_version}}/memory-objects?room_id={{room_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memory-objects"
 							],
 							"query": [
