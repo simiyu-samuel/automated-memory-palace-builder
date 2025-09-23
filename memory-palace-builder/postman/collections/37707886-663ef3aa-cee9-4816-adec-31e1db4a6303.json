@@ -398,12 +398,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/palace-rooms?user_id={{user_id}}",
+							"raw": "{{base_url}}/api/{{api_version}}/palace-rooms?user_id={{user_id}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"palace-rooms"
 							],
 							"query": [
