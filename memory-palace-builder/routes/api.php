@@ -5,7 +5,7 @@ use App\Http\Controllers\API\ApiConnectionController;
 use App\Http\Controllers\API\PalaceDataController;
 use App\Http\Controllers\API\GmailSyncController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\API\AuthController;
 
 
 Route::post('login', [AuthController::class, 'login']);
