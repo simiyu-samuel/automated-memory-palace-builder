@@ -723,12 +723,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/memories/{{memory_id}}/related",
+							"raw": "{{base_url}}/api/{{api_version}}/memories/{{memory_id}}/related",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memories",
 								"{{memory_id}}",
 								"related"
