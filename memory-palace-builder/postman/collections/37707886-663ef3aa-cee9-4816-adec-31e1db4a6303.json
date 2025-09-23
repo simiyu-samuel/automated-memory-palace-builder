@@ -829,12 +829,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/insights",
+							"raw": "{{base_url}}/api/{{api_version}}/insights",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"insights"
 							]
 						},
