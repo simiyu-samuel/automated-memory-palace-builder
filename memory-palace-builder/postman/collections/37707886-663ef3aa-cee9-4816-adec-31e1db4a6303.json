@@ -259,12 +259,13 @@
 							"raw": "{\n  \"provider\": \"gmail\",\n  \"email\": \"your.email@gmail.com\",\n  \"account_name\": \"My Gmail Account\",\n  \"scopes\": [\"https://www.googleapis.com/auth/gmail.readonly\"]\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/connections",
+							"raw": "{{base_url}}/api/{{api_version}}/connections",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"connections"
 							]
 						},
