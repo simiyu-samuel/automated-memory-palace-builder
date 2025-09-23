@@ -968,12 +968,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/palace/updates?since={{timestamp}}",
+							"raw": "{{base_url}}/api/{{api_version}}/palace/updates?since={{timestamp}}",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"palace",
 								"updates"
 							],
