@@ -655,12 +655,13 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/memories/stats",
+							"raw": "{{base_url}}/api/{{api_version}}/memories/stats",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memories",
 								"stats"
 							]
