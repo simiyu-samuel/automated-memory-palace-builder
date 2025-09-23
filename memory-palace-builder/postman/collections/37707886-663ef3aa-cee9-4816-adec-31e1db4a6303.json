@@ -443,12 +443,13 @@
 							"raw": "{\n  \"user_id\": {{user_id}},\n  \"name\": \"Creative Space\",\n  \"description\": \"Room for creative memories and artistic content\",\n  \"theme\": \"artistic\",\n  \"mood\": \"inspiring\",\n  \"color_scheme\": [\"#ff6b6b\", \"#4ecdc4\", \"#45b7d1\"],\n  \"position\": {\"x\": 0, \"y\": 0, \"z\": -20},\n  \"dimensions\": {\"width\": 15, \"height\": 10, \"depth\": 15},\n  \"lighting\": {\"ambient\": 0.4, \"directional\": 0.8, \"color\": \"#ffd700\"},\n  \"connections\": [],\n  \"is_active\": true\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/palace-rooms",
+							"raw": "{{base_url}}/api/{{api_version}}/palace-rooms",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"palace-rooms"
 							]
 						},
