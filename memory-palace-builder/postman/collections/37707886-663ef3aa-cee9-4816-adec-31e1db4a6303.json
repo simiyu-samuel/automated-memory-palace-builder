@@ -1009,12 +1009,13 @@
 							"raw": "{\n  \"title\": \"{{demo_content}}\",\n  \"content\": \"Sample memory content with important details about the project meeting\",\n  \"type\": \"email\",\n  \"user_id\": {{user_id}},\n  \"api_connection_id\": 1,\n  \"source_data\": {\n    \"message_id\": \"msg_123\",\n    \"from\": \"colleague@company.com\",\n    \"subject\": \"{{demo_content}}\"\n  },\n  \"memory_date\": \"2024-12-15T10:30:00Z\",\n  \"sentiment\": \"positive\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/memories",
+							"raw": "{{base_url}}/api/{{api_version}}/memories",
 							"host": [
 								"{{base_url}}"
 							],
 							"path": [
 								"api",
+								"{{api_version}}",
 								"memories"
 							]
 						},
